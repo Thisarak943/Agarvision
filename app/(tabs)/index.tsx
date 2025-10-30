@@ -193,22 +193,22 @@ export default function Home() {
 
   const services = [
     {
-      title: 'International VFD',
+      title: 'Chips & Resin Grading',
       description: 'Efficient, reliable drives',
       icon: require('../../assets/icons/vfd.png')
     },
     {
-      title: 'Uniforms',
+      title: 'Diesease Detection',
       description: 'Durable workwear solutions',
       icon: require('../../assets/icons/uniforms.png')
     },
     {
-      title: 'Safety Shoes',
+      title: 'Market Price Forecasting',
       description: 'Protection with comfort',
       icon: require('../../assets/icons/safetyshoes.png')
     },
     {
-      title: 'Embroidery Digitizing',
+      title: 'Stage Classification',
       description: 'Sharp, precise stitching',
       icon: require('../../assets/icons/embrodery.png')
     },

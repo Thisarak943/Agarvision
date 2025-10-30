@@ -3,12 +3,12 @@ import React, { useEffect } from 'react';
 import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
   withSequence,
-  withDelay 
+  withDelay
 } from 'react-native-reanimated';
 import Button from '../../components/ui/Button';
 
@@ -44,24 +44,23 @@ export default function Welcome() {
       <View className="flex-1 px-6 justify-between">
         <View className="flex-1 justify-center items-center">
           <Animated.View style={logoAnimatedStyle} className="mb-8">
-             <Image source={require('../../assets/icons/logo.png')} />
+            <Image source={require('../../assets/icons/logo.png')} />
           </Animated.View>
-          
+
           <Animated.View style={animatedStyle} className="items-center">
             <Text className="text-4xl font-bold text-gray-900 mb-4">
-              Global Trading Inc
+              AgarVison
             </Text>
             <Text className="text-lg text-gray-600 mb-2">
-              Premium Corporate Solutions
+              Premium Agarwood Solutions
             </Text>
             <Text className="text-center text-gray-500 leading-6 px-4">
-              Safety Footwear and Uniforms
+
             </Text>
             <Text className="text-center text-gray-500 leading-6 px-4 mt-4">
-              Global is an official international distributor for VF
-              Imagewear Inc. The brands we represent include Red
-              Kap, Horace Small, Bulwark and Wrangler. If needed,
-              we can also provide customization of your garments.
+              AgarVision is an intelligent platform developed for sustainable agarwood cultivation.
+              The solutions we provide include disease detection, stage classification,
+              resin grading, and market price prediction. 
             </Text>
           </Animated.View>
         </View>
