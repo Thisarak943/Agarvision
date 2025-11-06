@@ -185,10 +185,10 @@ export default function Home() {
   };
 
   const categories = [
-    { title: 'Chips', icon: require('../../assets/icons/footwear.png') },
-    { title: 'Oud Oil', icon: require('../../assets/icons/brands.png') },
-    { title: 'Perfumes', icon: require('../../assets/icons/clothes.png') },
-    { title: 'Incence', icon: require('../../assets/icons/accessories.png') }
+    { title: 'Chips', icon: require('../../assets/icons/chips.png') },
+    { title: 'Oud Oil', icon: require('../../assets/icons/oil.png') },
+    { title: 'Perfumes', icon: require('../../assets/icons/perfume.png') },
+    { title: 'Incence', icon: require('../../assets/icons/incence.png') }
   ];
 
   const services = [
@@ -198,7 +198,7 @@ export default function Home() {
       icon: require('../../assets/icons/vfd.png')
     },
     {
-      title: 'Diesease Detection',
+      title: 'Disease Detection',
       description: 'Durable workwear solutions',
       icon: require('../../assets/icons/uniforms.png')
     },
@@ -219,7 +219,7 @@ export default function Home() {
     {
       title: "Global Agarwood Market Prices on the Rise",
       description: "Latest trends and price shifts worldwide.",
-      image: require("../../assets/images/gov-buyers.jpg"),
+      image: require("../../assets/images/market.jpg"),
       images: [
         require("../../assets/images/gov1.jpg"),
         require("../../assets/images/gov2.jpg"),
@@ -236,7 +236,7 @@ export default function Home() {
     {
       title: "Common Agarwood Tree Diseases and Prevention Tips",
       description: "Identify and protect trees from infections.",
-      image: require("../../assets/images/fr-clothing.jpg"),
+      image: require("../../assets/images/diesease.jpg"),
       images: [
         require("../../assets/images/fr1.jpg"),
         require("../../assets/images/fr2.jpg"),
@@ -253,7 +253,7 @@ export default function Home() {
     {
       title: "Resin Quality Boost Through New Cultivation Methods",
       description: "Research shows improved resin yield naturally.",
-      image: require("../../assets/images/blackinton.jpg"),
+      image: require("../../assets/images/quality.jpg"),
       images: [
         require("../../assets/images/blackinton1.jpg"),
         require("../../assets/images/blackinton2.jpg"),
@@ -379,11 +379,11 @@ export default function Home() {
             />
           )}
 
-          {activeModal === "Diesease Detection" && (
+          {activeModal === "Disease Detection" && (
             <ServiceModal
               visible={true}
               onClose={closeModal}
-              title="Diesease Detection"
+              title="Disease Detection"
               content={<UniformsContent />}
             />
           )}
