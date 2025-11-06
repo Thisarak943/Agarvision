@@ -1,4 +1,4 @@
-// app/(tabs)/_layout.tsx - Updated with newer API
+// app/(tabs)/_layout.tsx
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -14,53 +14,42 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
+          ios: { position: 'absolute' },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
 
       <Tabs.Screen
         name="orders"
         options={{
-          title: 'Orders',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list" size={size} color={color} />
-          ),
+          title: 'Products',
+          tabBarIcon: ({ color, size }) => <Ionicons name="pricetags-outline" size={size} color={color} />,
         }}
       />
 
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
-          ),
+          title: 'Services',
+          tabBarIcon: ({ color, size }) => <Ionicons name="construct-outline" size={size} color={color} />,
         }}
       />
 
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Cart',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart" size={size} color={color} />
-          ),
+          title: 'Articles',
+          tabBarIcon: ({ color, size }) => <Ionicons name="newspaper-outline" size={size} color={color} />,
         }}
       />
 
@@ -68,12 +57,9 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
         }}
       />
-
     </Tabs>
   );
 }
