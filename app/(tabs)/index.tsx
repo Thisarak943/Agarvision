@@ -1,6 +1,6 @@
 // app/(tabs)/index.tsx
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -62,9 +62,11 @@ export default function Home() {
 
   // Read ?section=products|services|articles (from /(tabs)?section=...)
   const params = useLocalSearchParams<{ section?: string | string[] }>();
-  const section = Array.isArray(params.section)
-    ? (params.section[0] as SectionKey)
-    : (params.section as SectionKey | undefined);
+  const section = useMemo(() => {
+    const raw = Array.isArray(params.section) ? params.section[0] : params.section;
+    if (raw === 'products' || raw === 'services' || raw === 'articles') return raw as SectionKey;
+    return undefined;
+  }, [params.section]);
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSSModal, setActiveSSModal] = useState<string | null>(null);
@@ -101,15 +103,9 @@ export default function Home() {
   const [contentReady, setContentReady] = useState(false);
   const yOffsets = useRef<{ products?: number; services?: number; articles?: number }>({});
 
-  const onProductsLayout = (e: any) => {
-    yOffsets.current.products = e.nativeEvent.layout.y;
-  };
-  const onServicesLayout = (e: any) => {
-    yOffsets.current.services = e.nativeEvent.layout.y;
-  };
-  const onArticlesLayout = (e: any) => {
-    yOffsets.current.articles = e.nativeEvent.layout.y;
-  };
+  const onProductsLayout = (e: any) => { yOffsets.current.products = e.nativeEvent.layout.y; };
+  const onServicesLayout = (e: any) => { yOffsets.current.services = e.nativeEvent.layout.y; };
+  const onArticlesLayout = (e: any) => { yOffsets.current.articles = e.nativeEvent.layout.y; };
 
   const onContentSizeChange = () => {
     if (!contentReady) setContentReady(true);
@@ -199,6 +195,14 @@ export default function Home() {
 
   const displayUser = user || { firstname: 'Test', lastname: 'User' };
 
+  // Map category titles -> slugs for (products)/[category]
+  const titleToSlug: Record<string, string> = {
+    'Chips': 'chips',
+    'Oud Oil': 'oud-oil',
+    'Perfumes': 'perfumes',
+    'Incence': 'incence',
+  };
+
   // ----- REQUIRED by <GlobalSearch onResultSelect=...> -----
   const handleSearchResultSelect = (result: SearchResult) => {
     switch (result.type) {
@@ -208,10 +212,11 @@ export default function Home() {
       case 'special_service':
         openSSModal(result.title);
         break;
-      case 'category':
-        // If a category is chosen in search, jump to Products section
+      case 'category': {
+        // Jump to Products section (and you could also route to a specific category if you add a slug to result)
         scrollToSection('products');
         break;
+      }
       default:
         break;
     }
@@ -273,8 +278,10 @@ export default function Home() {
                   title={category.title}
                   icon={category.icon}
                   onPress={() => {
-                    // Optional: keep same behavior + ensure top of products
-                    scrollToSection('products');
+                    const slug = titleToSlug[category.title];
+                    if (slug) {
+                      router.push({ pathname: '/(products)/[category]', params: { category: slug } });
+                    }
                   }}
                   gradient={['#BDF9E5', '#FFFFFF']}
                 />
