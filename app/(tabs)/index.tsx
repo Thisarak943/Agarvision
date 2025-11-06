@@ -195,22 +195,22 @@ export default function Home() {
     {
       title: 'Chips & Resin Grading',
       description: 'Efficient, reliable drives',
-      icon: require('../../assets/icons/vfd.png')
+      icon: require('../../assets/icons/good.png')
     },
     {
       title: 'Disease Detection',
       description: 'Durable workwear solutions',
-      icon: require('../../assets/icons/uniforms.png')
+      icon: require('../../assets/icons/leda.png')
     },
     {
       title: 'Market Price Forecasting',
       description: 'Protection with comfort',
-      icon: require('../../assets/icons/safetyshoes.png')
+      icon: require('../../assets/icons/mprice.png')
     },
     {
       title: 'Stage Classification',
       description: 'Sharp, precise stitching',
-      icon: require('../../assets/icons/embrodery.png')
+      icon: require('../../assets/icons/data.png')
     },
   ];
 
