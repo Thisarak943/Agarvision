@@ -185,7 +185,7 @@ export default function Home() {
   };
 
   const categories = [
-    { title: 'Footwear', icon: require('../../assets/icons/footwear.png') },
+    { title: 'Footwe', icon: require('../../assets/icons/footwear.png') },
     { title: 'Brands', icon: require('../../assets/icons/brands.png') },
     { title: 'Clothing', icon: require('../../assets/icons/clothes.png') },
     { title: 'Accesories', icon: require('../../assets/icons/accessories.png') }
@@ -212,15 +212,11 @@ export default function Home() {
       description: 'Sharp, precise stitching',
       icon: require('../../assets/icons/embrodery.png')
     },
-    {
-      title: 'Alternation & Sewing',
-      description: 'Perfect fit tailoring',
-      icon: require('../../assets/icons/sewing.png')
-    }
+   
   ];
 
 
-  const specialServices = [
+  const specialServices = [                                   
     {
       title: "Government Buyers",
       description: "Specialized procurement solutions for government agencies",
@@ -375,50 +371,43 @@ export default function Home() {
           ))}
 
           {/* Service Modals */}
-          {activeModal === "International VFD" && (
+          {activeModal === "Chips & Resin Grading" && (
             <ServiceModal
               visible={true}
               onClose={closeModal}
-              title="International VFD"
+              title="Chips & Resin Grading"
               content={<VFDContent />}
             />
           )}
 
-          {activeModal === "Uniforms" && (
+          {activeModal === "Diesease Detection" && (
             <ServiceModal
               visible={true}
               onClose={closeModal}
-              title="Uniforms"
+              title="Diesease Detection"
               content={<UniformsContent />}
             />
           )}
 
-          {activeModal === "Safety Shoes" && (
+          {activeModal === "Market Price Forecasting" && (
             <ServiceModal
               visible={true}
               onClose={closeModal}
-              title="Safety Shoes"
+              title="Market Price Forecasting"
               content={<SafetyShoesContent />}
             />
           )}
 
-          {activeModal === "Embroidery Digitizing" && (
+          {activeModal === "Stage Classification" && (
             <ServiceModal
               visible={true}
               onClose={closeModal}
-              title="Embroidery Digitizing"
+              title="Stage Classification"
               content={<EmbroiederyContent />}
             />
           )}
 
-          {activeModal === "Alternation & Sewing" && (
-            <ServiceModal
-              visible={true}
-              onClose={closeModal}
-              title="Alternation & Sewing"
-              content={<SewingContent />}
-            />
-          )}
+        
         </View>
 
         {/* Special Services */}
