@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx
+// app/(tabs)/index.tsx  — UPDATED: Articles now show real news-style content
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -33,6 +33,11 @@ import CategoryCard from '../../components/ui/CategoryCard';
 import ServiceCard from '../../components/ui/ServiceCard';
 import SpecialServiceCard from '../../components/ui/SpecialServiceCard';
 
+// NEW: real article content
+import MarketPricesArticle from '../../components/articles/MarketPricesArticle';
+import TreeDiseasesArticle from '../../components/articles/TreeDiseasesArticle';
+import ResinQualityArticle from '../../components/articles/ResinQualityArticle';
+
 // ----- Types -----
 interface SearchResult {
   id: string;
@@ -60,7 +65,7 @@ export default function Home() {
   const { user } = useUser();
   const router = useRouter();
 
-  // Read ?section=products|services|articles (from /(tabs)?section=...)
+  // Read ?section=products|services|articles
   const params = useLocalSearchParams<{ section?: string | string[] }>();
   const section = useMemo(() => {
     const raw = Array.isArray(params.section) ? params.section[0] : params.section;
@@ -107,9 +112,7 @@ export default function Home() {
   const onServicesLayout = (e: any) => { yOffsets.current.services = e.nativeEvent.layout.y; };
   const onArticlesLayout = (e: any) => { yOffsets.current.articles = e.nativeEvent.layout.y; };
 
-  const onContentSizeChange = () => {
-    if (!contentReady) setContentReady(true);
-  };
+  const onContentSizeChange = () => { if (!contentReady) setContentReady(true); };
 
   const scrollToSection = (key?: SectionKey) => {
     if (!key) return;
@@ -118,9 +121,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (contentReady) {
-      scrollToSection(section);
-    }
+    if (contentReady) scrollToSection(section);
   }, [contentReady, section]);
 
   // ----- Data -----
@@ -145,16 +146,14 @@ export default function Home() {
       description: 'Latest trends and price shifts worldwide.',
       image: require('../../assets/images/market.jpg'),
       images: [
-        require('../../assets/images/gov1.jpg'),
-        require('../../assets/images/gov2.jpg'),
-        require('../../assets/images/gov3.jpg'),
+        require('../../assets/images/marketp1.jpg'),
+        require('../../assets/images/globalp3.jpg'),
+        require('../../assets/images/marketp2.jpg'),
       ],
       specifications: [
-        { label: 'Contract Type', value: 'GSA Schedule' },
-        { label: 'CAGE Code', value: '1ABC23' },
-        { label: 'DUNS Number', value: '123456789' },
-        { label: 'Minority Business', value: 'Certified' },
-        { label: 'Processing Time', value: '5-10 Business Days' },
+        { label: 'Coverage', value: 'Global' },
+        { label: 'Focus', value: 'Price indices, trade flows' },
+        { label: 'Updated', value: 'Monthly snapshot' },
       ],
     },
     {
@@ -162,16 +161,14 @@ export default function Home() {
       description: 'Identify and protect trees from infections.',
       image: require('../../assets/images/diesease.jpg'),
       images: [
-        require('../../assets/images/fr1.jpg'),
-        require('../../assets/images/fr2.jpg'),
-        require('../../assets/images/fr3.jpg'),
+        require('../../assets/images/des2.jpg'),
+        require('../../assets/images/des3.jpg'),
+        require('../../assets/images/des1.jpg'),
       ],
       specifications: [
-        { label: 'Protection Level', value: 'NFPA 70E & 2112' },
-        { label: 'Arc Rating', value: 'Up to 40 cal/cm²' },
-        { label: 'Fabric Weight', value: '7oz - 12oz' },
-        { label: 'Fabric Type', value: '100% Cotton & Blends' },
-        { label: 'Colors Available', value: 'Navy, Royal, Khaki' },
+        { label: 'Scope', value: 'Cultivation & smallholders' },
+        { label: 'Focus', value: 'Symptoms, prevention, treatment' },
+        { label: 'Seasonality', value: 'Monsoon risk alerts' },
       ],
     },
     {
@@ -179,16 +176,14 @@ export default function Home() {
       description: 'Research shows improved resin yield naturally.',
       image: require('../../assets/images/quality.jpg'),
       images: [
-        require('../../assets/images/blackinton1.jpg'),
-        require('../../assets/images/blackinton2.jpg'),
-        require('../../assets/images/blackinton3.jpg'),
+        require('../../assets/images/res3.jpg'),
+        require('../../assets/images/res2.jpg'),
+        require('../../assets/images/res1.jpg'),
       ],
       specifications: [
-        { label: 'Material', value: 'Brass & Nickel Silver' },
-        { label: 'Finish Options', value: 'Gold, Silver, Antique' },
-        { label: 'Customization', value: 'Full Custom Design' },
-        { label: 'Turnaround Time', value: '2-4 Weeks' },
-        { label: 'Warranty', value: 'Lifetime Craftsmanship' },
+        { label: 'Method', value: 'Low-stress induction' },
+        { label: 'Trial Length', value: '18–24 months' },
+        { label: 'Outcome', value: 'Higher density, cleaner smoke' },
       ],
     },
   ];
@@ -203,7 +198,7 @@ export default function Home() {
     'Incence': 'incence',
   };
 
-  // ----- REQUIRED by <GlobalSearch onResultSelect=...> -----
+  // Search selection
   const handleSearchResultSelect = (result: SearchResult) => {
     switch (result.type) {
       case 'service':
@@ -212,13 +207,25 @@ export default function Home() {
       case 'special_service':
         openSSModal(result.title);
         break;
-      case 'category': {
-        // Jump to Products section (and you could also route to a specific category if you add a slug to result)
+      case 'category':
         scrollToSection('products');
         break;
-      }
       default:
         break;
+    }
+  };
+
+  // Helper to render the correct Article body in the modal
+  const renderArticleBody = () => {
+    switch (activeSSModal) {
+      case 'Global Agarwood Market Prices on the Rise':
+        return <MarketPricesArticle />;
+      case 'Common Agarwood Tree Diseases and Prevention Tips':
+        return <TreeDiseasesArticle />;
+      case 'Resin Quality Boost Through New Cultivation Methods':
+        return <ResinQualityArticle />;
+      default:
+        return null;
     }
   };
 
@@ -293,8 +300,8 @@ export default function Home() {
         {/* ===== SERVICES ===== */}
         <View className="px-6 mb-6 mt-3" onLayout={onServicesLayout}>
           <Text className="text-2xl font-bold text-primary mb-4">Main Services</Text>
-          {services.map((service, index) => (
-            <Animated.View key={service.title} entering={FadeInUp.delay(500 + index * 200)}>
+          {services.map((service) => (
+            <Animated.View key={service.title} entering={FadeInUp.delay(500)}>
               <ServiceCard
                 title={service.title}
                 description={service.description}
@@ -307,7 +314,7 @@ export default function Home() {
             </Animated.View>
           ))}
 
-          {/* Service Modals */}
+          {/* Service Modals (unchanged content components) */}
           {activeModal === 'Chips & Resin Grading' && (
             <ServiceModal visible={true} onClose={closeModal} title="Chips & Resin Grading" content={<VFDContent />} />
           )}
@@ -315,12 +322,7 @@ export default function Home() {
             <ServiceModal visible={true} onClose={closeModal} title="Disease Detection" content={<UniformsContent />} />
           )}
           {activeModal === 'Market Price Forecasting' && (
-            <ServiceModal
-              visible={true}
-              onClose={closeModal}
-              title="Market Price Forecasting"
-              content={<SafetyShoesContent />}
-            />
+            <ServiceModal visible={true} onClose={closeModal} title="Market Price Forecasting" content={<SafetyShoesContent />} />
           )}
           {activeModal === 'Stage Classification' && (
             <ServiceModal visible={true} onClose={closeModal} title="Stage Classification" content={<EmbroiederyContent />} />
@@ -330,49 +332,37 @@ export default function Home() {
         {/* ===== ARTICLES ===== */}
         <View className="px-6 mb-6 mt-3" onLayout={onArticlesLayout}>
           <Text className="text-2xl font-bold text-primary mb-4">Articles</Text>
-          {specialServices.map((brand, index) => (
-            <Animated.View key={brand.title} entering={FadeInUp.delay(500 + index * 200)}>
+          {specialServices.map((item, index) => (
+            <Animated.View key={item.title} entering={FadeInUp.delay(500 + index * 200)}>
               <SpecialServiceCard
-                title={brand.title}
-                description={brand.description}
-                image={brand.image}
+                title={item.title}
+                description={item.description}
+                image={item.image}
                 badge="Article"
                 featured={true}
-                onPress={() => openSSModal(brand.title)}
+                onPress={() => openSSModal(item.title)}
               />
             </Animated.View>
           ))}
         </View>
 
-        {/* Article Modals */}
-        {activeSSModal === 'Global Agarwood Market Prices on the Rise' && (
+        {/* Article Modals — now render rich article bodies */}
+        {activeSSModal && (
           <SpecialServiceModal
             visible={true}
             onClose={closeSSModal}
-            title="Global Agarwood Market Prices on the Rise"
-            images={specialServices[0].images}
-            specifications={specialServices[0].specifications}
-            content={<GovernmentBuyersContent />}
-          />
-        )}
-        {activeSSModal === 'Common Agarwood Tree Diseases and Prevention Tips' && (
-          <SpecialServiceModal
-            visible={true}
-            onClose={closeSSModal}
-            title="Common Agarwood Tree Diseases and Prevention Tips"
-            images={specialServices[1].images}
-            specifications={specialServices[1].specifications}
-            content={<FRClothingContent />}
-          />
-        )}
-        {activeSSModal === 'Resin Quality Boost Through New Cultivation Methods' && (
-          <SpecialServiceModal
-            visible={true}
-            onClose={closeSSModal}
-            title="Resin Quality Boost Through New Cultivation Methods"
-            images={specialServices[2].images}
-            specifications={specialServices[2].specifications}
-            content={<BlackintonContent />}
+            title={activeSSModal}
+            images={
+              activeSSModal === 'Global Agarwood Market Prices on the Rise' ? specialServices[0].images
+              : activeSSModal === 'Common Agarwood Tree Diseases and Prevention Tips' ? specialServices[1].images
+              : specialServices[2].images
+            }
+            specifications={
+              activeSSModal === 'Global Agarwood Market Prices on the Rise' ? specialServices[0].specifications
+              : activeSSModal === 'Common Agarwood Tree Diseases and Prevention Tips' ? specialServices[1].specifications
+              : specialServices[2].specifications
+            }
+            content={renderArticleBody()}
           />
         )}
 
