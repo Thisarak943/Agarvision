@@ -1,376 +1,278 @@
 // components/GlobalSearch.tsx
 import React, { useState, useEffect } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    ScrollView,
-    Image,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withTiming,
-    withSpring,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 
-// Define search result types
+// Match the shape your index.tsx expects
 interface SearchResult {
-    id: string;
-    type: 'product' | 'service' | 'special_service' | 'category';
-    title: string;
-    subtitle?: string;
-    description?: string;
-    image?: any;
-    category?: string;
-    navigationParams?: any;
+  id: string;
+  type: 'product' | 'service' | 'special_service' | 'category';
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: any;            // kept for compatibility; we won't use it
+  category?: string;
+  navigationParams?: any; // e.g., { category: 'chips' }
 }
 
 interface GlobalSearchProps {
-    onResultSelect?: (result: SearchResult) => void;
+  onResultSelect?: (result: SearchResult) => void;
 }
 
+const CATEGORY_TO_SLUG: Record<string, string> = {
+  'Chips': 'chips',
+  'Oud Oil': 'oud-oil',
+  'Perfumes': 'perfumes',
+  'Incence': 'incence',
+};
+
 export default function GlobalSearch({ onResultSelect }: GlobalSearchProps) {
-    const router = useRouter();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-    const [isExpanded, setIsExpanded] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-    // Animation values
-    const resultsHeight = useSharedValue(0);
-    const opacity = useSharedValue(0);
+  // animation
+  const resultsHeight = useSharedValue(0);
+  const opacity = useSharedValue(0);
 
-    // All searchable data
-    const allData: SearchResult[] = [
-        // Products
-        {
-            id: 'product_1',
-            type: 'product',
-            title: '8" Tactical Boot',
-            subtitle: 'Reebok',
-            description: 'Footwear',
-            category: 'Footwear',
-            image: require('../assets/images/boot.png'),
-            navigationParams: { productId: '1' }
-        },
-        {
-            id: 'product_2',
-            type: 'product',
-            title: 'Combat Gloves',
-            subtitle: 'Nike',
-            description: 'Accessories',
-            category: 'Accessories',
-            image: require('../assets/images/boot.png'),
-            navigationParams: { productId: '2' }
-        },
-        {
-            id: 'product_3',
-            type: 'product',
-            title: 'Training Pants',
-            subtitle: 'Under Armour',
-            description: 'Uniforms',
-            category: 'Uniforms',
-            image: require('../assets/images/boot.png'),
-            navigationParams: { productId: '3' }
-        },
-        // Services
-        {
-            id: 'service_1',
-            type: 'service',
-            title: 'International VFD',
-            description: 'Volunteer Fire Department services',
-            image: require('../assets/icons/vfd.png'),
-            navigationParams: { service: 'International VFD' }
-        },
-        {
-            id: 'service_2',
-            type: 'service',
-            title: 'Uniforms',
-            description: 'Custom uniform solutions',
-            image: require('../assets/icons/uniforms.png'),
-            navigationParams: { service: 'Uniforms' }
-        },
-        {
-            id: 'service_3',
-            type: 'service',
-            title: 'Safety Shoes',
-            description: 'Professional safety footwear',
-            image: require('../assets/icons/safetyshoes.png'),
-            navigationParams: { service: 'Safety Shoes' }
-        },
-        {
-            id: 'service_4',
-            type: 'service',
-            title: 'Embroidery Digitizing',
-            description: 'Custom embroidery services',
-            image: require('../assets/icons/embrodery.png'),
-            navigationParams: { service: 'Embroidery Digitizing' }
-        },
-        {
-            id: 'service_5',
-            type: 'service',
-            title: 'Alternation & Sewing',
-            description: 'Professional alteration services',
-            image: require('../assets/icons/sewing.png'),
-            navigationParams: { service: 'Alternation & Sewing' }
-        },
-        // Special Services
-        {
-            id: 'special_1',
-            type: 'special_service',
-            title: 'Government Buyers',
-            description: 'Specialized procurement solutions for government agencies',
-            image: require('../assets/images/government-buyers.png'),
-            navigationParams: { specialService: 'Government Buyers' }
-        },
-        {
-            id: 'special_2',
-            type: 'special_service',
-            title: 'FR Clothing',
-            description: 'Premium flame-resistant clothing for industrial safety',
-            image: require('../assets/images/fr-clothing.png'),
-            navigationParams: { specialService: 'FR Clothing' }
-        },
-        {
-            id: 'special_3',
-            type: 'special_service',
-            title: 'Blackinton',
-            description: 'Premium law enforcement badges and insignia',
-            image: require('../assets/images/blackinton.png'),
-            navigationParams: { specialService: 'Blackinton' }
-        },
-        // Categories
-        {
-            id: 'cat_1',
-            type: 'category',
-            title: 'Footwear',
-            description: 'Browse all footwear products',
-            image: require('../assets/icons/footwear.png'),
-            navigationParams: { category: 'Footwear' }
-        },
-        {
-            id: 'cat_2',
-            type: 'category',
-            title: 'Brands',
-            description: 'Browse all brand products',
-            image: require('../assets/icons/brands.png'),
-            navigationParams: { category: 'Brands' }
-        },
-        {
-            id: 'cat_3',
-            type: 'category',
-            title: 'Clothing',
-            description: 'Browse all clothing products',
-            image: require('../assets/icons/clothes.png'),
-            navigationParams: { category: 'Clothing' }
-        },
-        {
-            id: 'cat_4',
-            type: 'category',
-            title: 'Accessories',
-            description: 'Browse all accessory products',
-            image: require('../assets/icons/accessories.png'),
-            navigationParams: { category: 'Accessories' }
-        }
-    ];
+  // ---------- single source of searchable items ----------
+  // (no images here to avoid asset path issues)
+  const allData: SearchResult[] = [
+    // === Agarwood Products (categories) ===
+    {
+      id: 'cat_chips',
+      type: 'category',
+      title: 'Chips',
+      subtitle: 'Agarwood Products',
+      description: 'Resin-dense wood pieces, graded by quality',
+      navigationParams: { category: CATEGORY_TO_SLUG['Chips'] },
+    },
+    {
+      id: 'cat_oil',
+      type: 'category',
+      title: 'Oud Oil',
+      subtitle: 'Agarwood Products',
+      description: 'Single-origin oud oils and blends',
+      navigationParams: { category: CATEGORY_TO_SLUG['Oud Oil'] },
+    },
+    {
+      id: 'cat_perfumes',
+      type: 'category',
+      title: 'Perfumes',
+      subtitle: 'Agarwood Products',
+      description: 'Fragrances crafted with oud accords',
+      navigationParams: { category: CATEGORY_TO_SLUG['Perfumes'] },
+    },
+    {
+      id: 'cat_incence',
+      type: 'category',
+      title: 'Incence',
+      subtitle: 'Agarwood Products',
+      description: 'Incense / bakhour made from agarwood',
+      navigationParams: { category: CATEGORY_TO_SLUG['Incence'] },
+    },
 
-    // Search functionality
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            setSearchResults([]);
-            setIsExpanded(false);
-            resultsHeight.value = withTiming(0, { duration: 200 });
-            opacity.value = withTiming(0, { duration: 200 });
-            return;
-        }
+    // === Main Services === (titles must match exactly what index.tsx expects)
+    {
+      id: 'srv_grade',
+      type: 'service',
+      title: 'Chips & Resin Grading',
+      subtitle: 'Main Services',
+      description: 'Objective grading for chip batches and resin yield',
+    },
+    {
+      id: 'srv_disease',
+      type: 'service',
+      title: 'Disease Detection',
+      subtitle: 'Main Services',
+      description: 'Tree health diagnostics and field guidance',
+    },
+    {
+      id: 'srv_market',
+      type: 'service',
+      title: 'Market Price Forecasting',
+      subtitle: 'Main Services',
+      description: 'Short-term and seasonal price outlooks',
+    },
+    {
+      id: 'srv_stage',
+      type: 'service',
+      title: 'Stage Classification',
+      subtitle: 'Main Services',
+      description: 'Standardized stage assessment & reporting',
+    },
 
-        // Filter results based on search term
-        const filtered = allData.filter(item => 
-            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.subtitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.category?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    // === Articles (special_service) === (titles must match your modals)
+    {
+      id: 'art_prices',
+      type: 'special_service',
+      title: 'Global Agarwood Market Prices on the Rise',
+      subtitle: 'Articles',
+      description: 'Quarterly movement across grades and regions',
+    },
+    {
+      id: 'art_disease',
+      type: 'special_service',
+      title: 'Common Agarwood Tree Diseases and Prevention Tips',
+      subtitle: 'Articles',
+      description: 'Seasonal disease pressure and prevention steps',
+    },
+    {
+      id: 'art_resin',
+      type: 'special_service',
+      title: 'Resin Quality Boost Through New Cultivation Methods',
+      subtitle: 'Articles',
+      description: 'Low-stress induction trials & curing discipline',
+    },
+  ];
 
-        setSearchResults(filtered.slice(0, 8)); // Limit to 8 results
-        setIsExpanded(filtered.length > 0);
-        
-        if (filtered.length > 0) {
-            resultsHeight.value = withSpring(1, { damping: 15, stiffness: 150 });
-            opacity.value = withTiming(1, { duration: 300 });
-        } else {
-            resultsHeight.value = withTiming(0, { duration: 200 });
-            opacity.value = withTiming(0, { duration: 200 });
-        }
-    }, [searchTerm]);
+  // tiny tokenizer
+  const norm = (s: string) =>
+    s.toLowerCase().normalize('NFKD').replace(/[^\p{L}\p{N}\s]/gu, ' ');
 
-    const resultsAnimatedStyle = useAnimatedStyle(() => {
-        return {
-            maxHeight: resultsHeight.value * 400,
-            opacity: opacity.value,
-        };
+  // search
+  useEffect(() => {
+    const q = searchTerm.trim();
+    if (!q) {
+      setSearchResults([]);
+      setIsExpanded(false);
+      resultsHeight.value = withTiming(0, { duration: 200 });
+      opacity.value = withTiming(0, { duration: 200 });
+      return;
+    }
+
+    const qTokens = norm(q).split(/\s+/).filter(Boolean);
+
+    const filtered = allData.filter((item) => {
+      const hay = norm(
+        `${item.title} ${item.subtitle ?? ''} ${item.description ?? ''} ${item.category ?? ''}`
+      );
+      // simple AND match
+      return qTokens.every((t) => hay.includes(t));
     });
 
-    const handleResultPress = (result: SearchResult) => {
-        setSearchTerm('');
-        setIsExpanded(false);
-        
-        if (onResultSelect) {
-            onResultSelect(result);
-        }
+    setSearchResults(filtered.slice(0, 8));
+    const hasResults = filtered.length > 0;
 
-        // Navigate based on result type
-        switch (result.type) {
-            case 'product':
-                router.push({
-                    pathname: '/product-details',
-                    params: result.navigationParams
-                });
-                break;
-            case 'service':
-                // Stay on homepage and trigger service modal
-                // This would be handled by the parent component
-                break;
-            case 'special_service':
-                // Stay on homepage and trigger special service modal
-                // This would be handled by the parent component
-                break;
-            case 'category':
-                router.push({
-                    pathname: '/(tabs)/explore',
-                    params: { selectedCategory: result.title }
-                });
-                break;
-        }
-    };
+    setIsExpanded(hasResults);
+    resultsHeight.value = hasResults ? withSpring(1, { damping: 15, stiffness: 150 }) : withTiming(0, { duration: 200 });
+    opacity.value = hasResults ? withTiming(1, { duration: 300 }) : withTiming(0, { duration: 200 });
+  }, [searchTerm]);
 
-    const clearSearch = () => {
-        setSearchTerm('');
-        setIsExpanded(false);
-    };
+  const resultsAnimatedStyle = useAnimatedStyle(() => ({
+    maxHeight: resultsHeight.value * 400,
+    opacity: opacity.value,
+  }));
 
-    const getResultIcon = (type: string) => {
-        switch (type) {
-            case 'product': return 'cube-outline';
-            case 'service': return 'construct-outline';
-            case 'special_service': return 'star-outline';
-            case 'category': return 'grid-outline';
-            default: return 'search-outline';
-        }
-    };
+  const clearSearch = () => {
+    setSearchTerm('');
+    setIsExpanded(false);
+    Keyboard.dismiss();
+  };
 
-    const getResultTypeLabel = (type: string) => {
-        switch (type) {
-            case 'product': return 'Product';
-            case 'service': return 'Service';
-            case 'special_service': return 'Special';
-            case 'category': return 'Category';
-            default: return '';
-        }
-    };
+  const getResultIcon = (type: string) => {
+    switch (type) {
+      case 'category': return 'pricetags-outline';
+      case 'service': return 'construct-outline';
+      case 'special_service': return 'newspaper-outline';
+      case 'product': return 'cube-outline';
+      default: return 'search-outline';
+    }
+  };
 
-    const handleViewAllResults = () => {
-        router.push({
-            pathname: '/(tabs)/explore',
-            params: { 
-                globalSearch: searchTerm,
-                searchType: 'global'
-            }
-        });
-        clearSearch();
-    };
+  const getResultTypeLabel = (type: string) => {
+    switch (type) {
+      case 'category': return 'Product';
+      case 'service': return 'Service';
+      case 'special_service': return 'Article';
+      case 'product': return 'Product';
+      default: return '';
+    }
+  };
 
-    return (
-        <View className="px-6 py-4">
-            {/* Search Bar */}
-            <View className="bg-gray-100 rounded-xl flex-row items-center px-4 py-3">
-                <Ionicons name="search" size={20} color="#9CA3AF" />
-                <TextInput
-                    placeholder="Search products, services, categories..."
-                    value={searchTerm}
-                    onChangeText={setSearchTerm}
-                    className="flex-1 ml-3 text-gray-900"
-                    placeholderTextColor="#9CA3AF"
-                />
-                {searchTerm.length > 0 && (
-                    <TouchableOpacity onPress={clearSearch} className="p-1">
-                        <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-                    </TouchableOpacity>
-                )}
-            </View>
+  const handleResultPress = (result: SearchResult) => {
+    clearSearch();
+    // let the parent (index.tsx) decide what to do:
+    // - category: navigate to /products/[category] or scroll to Products
+    // - service: open ServiceModal
+    // - special_service: open Article modal
+    onResultSelect?.(result);
+  };
 
-            {/* Search Results */}
-            <Animated.View 
-                style={resultsAnimatedStyle}
-                className="bg-white rounded-xl mt-2 border border-gray-200 overflow-hidden"
+  return (
+    <View className="px-6 py-4">
+      {/* search bar */}
+      <View className="bg-gray-100 rounded-xl flex-row items-center px-4 py-3">
+        <Ionicons name="search" size={20} color="#9CA3AF" />
+        <TextInput
+          placeholder="Search products, services, or articles…"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          className="flex-1 ml-3 text-gray-900"
+          placeholderTextColor="#9CA3AF"
+          returnKeyType="search"
+          onSubmitEditing={() => {
+            if (searchResults.length === 1) handleResultPress(searchResults[0]);
+          }}
+        />
+        {searchTerm.length > 0 && (
+          <TouchableOpacity onPress={clearSearch} className="p-1">
+            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* results */}
+      <Animated.View
+        style={resultsAnimatedStyle}
+        className="bg-white rounded-xl mt-2 border border-gray-200 overflow-hidden"
+      >
+        <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false} className="max-h-96">
+          {searchResults.map((result) => (
+            <TouchableOpacity
+              key={result.id}
+              onPress={() => handleResultPress(result)}
+              className="flex-row items-center p-4 border-b border-gray-100"
             >
-                <ScrollView 
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                    className="max-h-96"
-                >
-                    {searchResults.map((result) => (
-                        <TouchableOpacity
-                            key={result.id}
-                            onPress={() => handleResultPress(result)}
-                            className="flex-row items-center p-4 border-b border-gray-100"
-                        >
-                            {result.image ? (
-                                <Image 
-                                    source={result.image} 
-                                    className="w-12 h-12 rounded-lg mr-3"
-                                    resizeMode="contain"
-                                />
-                            ) : (
-                                <View className="w-12 h-12 bg-gray-200 rounded-lg mr-3 items-center justify-center">
-                                    <Ionicons 
-                                        name={getResultIcon(result.type)} 
-                                        size={20} 
-                                        color="#9CA3AF" 
-                                    />
-                                </View>
-                            )}
-                            
-                            <View className="flex-1">
-                                <View className="flex-row items-center">
-                                    <Text className="font-semibold text-gray-900 mr-2">
-                                        {result.title}
-                                    </Text>
-                                    <View className="bg-blue-100 px-2 py-1 rounded-full">
-                                        <Text className="text-xs text-blue-700">
-                                            {getResultTypeLabel(result.type)}
-                                        </Text>
-                                    </View>
-                                </View>
-                                {result.subtitle && (
-                                    <Text className="text-sm text-gray-600">
-                                        {result.subtitle}
-                                    </Text>
-                                )}
-                                <Text className="text-xs text-gray-500">
-                                    {result.description}
-                                </Text>
-                            </View>
-                            
-                            <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-                        </TouchableOpacity>
-                    ))}
-                    
-                    {searchResults.length >= 8 && (
-                        <TouchableOpacity
-                            onPress={handleViewAllResults}
-                            className="p-4 bg-gray-50 items-center"
-                        >
-                            <Text className="text-blue-600 font-medium">
-                                View all results for "{searchTerm}"
-                            </Text>
-                        </TouchableOpacity>
-                    )}
-                </ScrollView>
-            </Animated.View>
-        </View>
-    );
+              <View className="w-12 h-12 bg-gray-100 rounded-lg mr-3 items-center justify-center">
+                <Ionicons name={getResultIcon(result.type)} size={20} color="#10B981" />
+              </View>
+
+              <View className="flex-1">
+                <View className="flex-row items-center">
+                  <Text className="font-semibold text-gray-900 mr-2">{result.title}</Text>
+                  <View className="bg-emerald-50 px-2 py-1 rounded-full">
+                    <Text className="text-xs text-emerald-700">{getResultTypeLabel(result.type)}</Text>
+                  </View>
+                </View>
+                {result.subtitle && <Text className="text-sm text-gray-600">{result.subtitle}</Text>}
+                {result.description && <Text className="text-xs text-gray-500">{result.description}</Text>}
+              </View>
+
+              <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          ))}
+
+          {searchResults.length === 0 && !!searchTerm.trim() && (
+            <View className="p-4">
+              <Text className="text-sm text-gray-600">No matches. Try “chips”, “market price”, or “disease”.</Text>
+            </View>
+          )}
+        </ScrollView>
+      </Animated.View>
+    </View>
+  );
 }
