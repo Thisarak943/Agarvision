@@ -103,7 +103,7 @@ export default function Home() {
       read: false,
       actionable: true
     }
-  ]);
+  ] as any);
 
   const headerOpacity = useSharedValue(0);
   const searchOpacity = useSharedValue(0);
@@ -148,7 +148,7 @@ export default function Home() {
 
   const handleNotificationRead = (id: number) => {
     setNotifications(prev =>
-      prev.map(notification =>
+      prev.map((notification: any) =>
         notification.id === id
           ? { ...notification, read: true }
           : notification
@@ -185,10 +185,10 @@ export default function Home() {
   };
 
   const categories = [
-    { title: 'Footwe', icon: require('../../assets/icons/footwear.png') },
-    { title: 'Brands', icon: require('../../assets/icons/brands.png') },
-    { title: 'Clothing', icon: require('../../assets/icons/clothes.png') },
-    { title: 'Accesories', icon: require('../../assets/icons/accessories.png') }
+    { title: 'Chips', icon: require('../../assets/icons/footwear.png') },
+    { title: 'Oud Oil', icon: require('../../assets/icons/brands.png') },
+    { title: 'Perfumes', icon: require('../../assets/icons/clothes.png') },
+    { title: 'Incence', icon: require('../../assets/icons/accessories.png') }
   ];
 
   const services = [
@@ -212,14 +212,13 @@ export default function Home() {
       description: 'Sharp, precise stitching',
       icon: require('../../assets/icons/embrodery.png')
     },
-   
   ];
 
-
-  const specialServices = [                                   
+  // Keeping variable/component names the same for safety.
+  const specialServices = [
     {
-      title: "Government Buyers",
-      description: "Specialized procurement solutions for government agencies",
+      title: "Global Agarwood Market Prices on the Rise",
+      description: "Latest trends and price shifts worldwide.",
       image: require("../../assets/images/gov-buyers.jpg"),
       images: [
         require("../../assets/images/gov1.jpg"),
@@ -235,8 +234,8 @@ export default function Home() {
       ]
     },
     {
-      title: "FR Clothing",
-      description: "Premium flame-resistant clothing for industrial safety",
+      title: "Common Agarwood Tree Diseases and Prevention Tips",
+      description: "Identify and protect trees from infections.",
       image: require("../../assets/images/fr-clothing.jpg"),
       images: [
         require("../../assets/images/fr1.jpg"),
@@ -252,8 +251,8 @@ export default function Home() {
       ]
     },
     {
-      title: "Blackinton",
-      description: "Premium law enforcement badges and insignia",
+      title: "Resin Quality Boost Through New Cultivation Methods",
+      description: "Research shows improved resin yield naturally.",
       image: require("../../assets/images/blackinton.jpg"),
       images: [
         require("../../assets/images/blackinton1.jpg"),
@@ -273,7 +272,7 @@ export default function Home() {
   // FRONTEND ONLY FIX - Remove this check to allow testing without backend
   // The loading and login checks are commented out for frontend testing
   // Uncomment these when connecting to backend
-  
+
   // if (loading) {
   //   return (
   //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -310,7 +309,7 @@ export default function Home() {
               className="mr-4"
             >
               <Ionicons name="notifications" size={24} color="#10B981" />
-              {notifications.filter(n => !n.read).length > 0 && (
+              {notifications.filter((n: any) => !n.read).length > 0 && (
                 <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
               )}
             </TouchableOpacity>
@@ -329,7 +328,7 @@ export default function Home() {
 
         {/* Categories */}
         <View className="px-6 mb-6">
-          <Text className="text-2xl font-bold text-primary mb-4">Categories</Text>
+          <Text className="text-2xl font-bold text-primary mb-4">Agarwood Products</Text>
 
           <ScrollView
             horizontal
@@ -406,13 +405,11 @@ export default function Home() {
               content={<EmbroiederyContent />}
             />
           )}
-
-        
         </View>
 
-        {/* Special Services */}
+        {/* Articles (formerly Special Services) */}
         <View className="px-6 mb-6 mt-3">
-          <Text className="text-2xl font-bold text-primary mb-4">Special Services</Text>
+          <Text className="text-2xl font-bold text-primary mb-4">Articles</Text>
           {specialServices.map((brand, index) => (
             <Animated.View
               key={brand.title}
@@ -422,7 +419,8 @@ export default function Home() {
                 title={brand.title}
                 description={brand.description}
                 image={brand.image}
-                badge="Special"
+                // Safe change: just the displayed badge text.
+                badge="Article"
                 featured={true}
                 onPress={() => openSSModal(brand.title)}
               />
@@ -430,34 +428,34 @@ export default function Home() {
           ))}
         </View>
 
-        {/* Special Service Modals */}
-        {activeSSModal === "Government Buyers" && (
+        {/* Article Modals (logic kept identical for safety) */}
+        {activeSSModal === "Global Agarwood Market Prices on the Rise" && (
           <SpecialServiceModal
             visible={true}
             onClose={closeSSModal}
-            title="Government Buyers"
+            title="Global Agarwood Market Prices on the Rise"
             images={specialServices[0].images}
             specifications={specialServices[0].specifications}
             content={<GovernmentBuyersContent />}
           />
         )}
 
-        {activeSSModal === "FR Clothing" && (
+        {activeSSModal === "Common Agarwood Tree Diseases and Prevention Tips" && (
           <SpecialServiceModal
             visible={true}
             onClose={closeSSModal}
-            title="FR Clothing"
+            title="Common Agarwood Tree Diseases and Prevention Tips"
             images={specialServices[1].images}
             specifications={specialServices[1].specifications}
             content={<FRClothingContent />}
           />
         )}
 
-        {activeSSModal === "Blackinton" && (
+        {activeSSModal === "Resin Quality Boost Through New Cultivation Methods" && (
           <SpecialServiceModal
             visible={true}
             onClose={closeSSModal}
-            title="Blackinton"
+            title="Resin Quality Boost Through New Cultivation Methods"
             images={specialServices[2].images}
             specifications={specialServices[2].specifications}
             content={<BlackintonContent />}
@@ -467,13 +465,11 @@ export default function Home() {
         <View className="h-20" />
       </ScrollView>
 
-      {/* Notifications Modal */}
-
-
+      {/* Notifications & Settings */}
       <NotificationSlideView
         visible={showNotificationSlide}
         onClose={() => setShowNotificationSlide(false)}
-        notifications={notifications}
+        notifications={notifications as any}
         onNotificationRead={handleNotificationRead}
         onNotificationAction={handleNotificationAction}
         onClearAll={handleClearAllNotifications}
@@ -486,7 +482,6 @@ export default function Home() {
         onLogout={() => handleLogout()}
         userInfo={{ name: 'John Doe', email: 'john@example.com' }}
       />
-
     </SafeAreaView>
   );
 }
