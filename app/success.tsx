@@ -57,7 +57,7 @@ export default function Success() {
           </Text>
           
           <Text className="text-gray-600 text-center mb-8 leading-6">
-            Your account has been successfully created. Welcome to Global Trading Inc!
+            Your account has been successfully created. Welcome to AgarVision!
           </Text>
 
           <Button
