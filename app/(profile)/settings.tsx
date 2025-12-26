@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/ui/Header';
 
 export default function Settings() {
+  // ✅ CLEANED: removed Addresses & Payment Methods
   const settingsItems = [
     {
       id: 1,
@@ -15,20 +16,6 @@ export default function Settings() {
     },
     {
       id: 2,
-      title: 'Addresses',
-      subtitle: 'Manage your saved addresses',
-      icon: 'location-outline',
-      onPress: () => router.push('/(profile)/shipping-address'),
-    },
-    {
-      id: 3,
-      title: 'Payment Methods',
-      subtitle: 'Manage your payment options',
-      icon: 'card-outline',
-      onPress: () => router.push('/(profile)/payment-methods'),
-    },
-    {
-      id: 4,
       title: 'Change Password',
       subtitle: 'Update your account password',
       icon: 'lock-closed-outline',
@@ -36,31 +23,31 @@ export default function Settings() {
     },
   ];
 
-  // ✅ NEW: single dynamic page routes
+  // ✅ Dynamic info routes (single info.tsx)
   const otherItems = [
     {
-      id: 5,
+      id: 3,
       title: 'History',
       subtitle: 'View your scan / prediction history',
       icon: 'time-outline',
       onPress: () => router.push('/(profile)/info?type=history'),
     },
     {
-      id: 6,
+      id: 4,
       title: 'Contact',
       subtitle: 'Call or contact support',
       icon: 'call-outline',
       onPress: () => router.push('/(profile)/info?type=contact'),
     },
     {
-      id: 7,
+      id: 5,
       title: 'Email',
       subtitle: 'Send us an email',
       icon: 'mail-outline',
       onPress: () => router.push('/(profile)/info?type=email'),
     },
     {
-      id: 8,
+      id: 6,
       title: 'About Us',
       subtitle: 'About AgarVision',
       icon: 'information-circle-outline',
@@ -101,24 +88,27 @@ export default function Settings() {
           <Text className="text-sm font-medium text-gray-500 uppercase tracking-wide px-6 mb-3">
             Account
           </Text>
-          <View className="bg-white">{settingsItems.map(renderSettingItem)}</View>
+          <View className="bg-white">
+            {settingsItems.map(renderSettingItem)}
+          </View>
         </View>
 
-        {/* Other Section */}
+        {/* Info Section */}
         <View className="mt-8">
           <Text className="text-sm font-medium text-gray-500 uppercase tracking-wide px-6 mb-3">
             Info
           </Text>
-          <View className="bg-white">{otherItems.map(renderSettingItem)}</View>
+          <View className="bg-white">
+            {otherItems.map(renderSettingItem)}
+          </View>
         </View>
 
-        {/* Optional: Sign Out (if you want UI only) */}
+        {/* Sign Out */}
         <View className="mt-10 px-6 pb-10">
           <TouchableOpacity
             className="bg-red-50 border border-red-200 rounded-xl py-4 items-center"
             onPress={() => {
-              // put your logout logic here
-              router.replace('/login'); // change if your login route different
+              router.replace('/(auth)/welcome');
             }}
           >
             <Text className="text-red-600 font-semibold">Sign Out</Text>
