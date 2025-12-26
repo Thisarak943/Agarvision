@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -9,37 +9,42 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  withSpring
+  withSpring,
 } from 'react-native-reanimated';
-import Header from "../../components/ui/Header";
+import Header from '../../components/ui/Header';
 
 interface FAQItem {
   id: string;
   question: string;
   answer: string;
   icon: string;
-  category: 'order' | 'delivery' | 'shipping' | 'payment' | 'account' | 'general';
+  category: 'scan' | 'quality' | 'export' | 'account' | 'technical' | 'general';
   tags: string[];
 }
 
-// Search Bar Component
-const SearchBar = ({ searchQuery, onSearchChange }: { 
-  searchQuery: string; 
-  onSearchChange: (text: string) => void; 
+/* ---------------------------
+   Search Bar
+---------------------------- */
+const SearchBar = ({
+  searchQuery,
+  onSearchChange,
+}: {
+  searchQuery: string;
+  onSearchChange: (text: string) => void;
 }) => (
-  <View className="mb-6">
+  <View className="mb-5">
     <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-4 py-3">
       <Ionicons name="search" size={20} color="#6b7280" />
       <TextInput
         className="flex-1 text-base text-gray-700 ml-3"
-        placeholder="Search for topics or questions"
+        placeholder="Search (e.g., grade, scan, export, camera)"
         placeholderTextColor="#9ca3af"
         value={searchQuery}
         onChangeText={onSearchChange}
@@ -53,50 +58,54 @@ const SearchBar = ({ searchQuery, onSearchChange }: {
   </View>
 );
 
-// Category Filter Component
-const CategoryFilter = ({ 
-  selectedCategory, 
-  onCategoryChange 
-}: { 
-  selectedCategory: string; 
-  onCategoryChange: (category: string) => void; 
+/* ---------------------------
+   Category Filter
+---------------------------- */
+const CategoryFilter = ({
+  selectedCategory,
+  onCategoryChange,
+}: {
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
 }) => {
   const categories = [
     { id: 'all', name: 'All', icon: 'apps-outline' },
-    { id: 'order', name: 'Orders', icon: 'bag-handle-outline' },
-    { id: 'delivery', name: 'Delivery', icon: 'car-outline' },
-    { id: 'shipping', name: 'Shipping', icon: 'airplane-outline' },
-    { id: 'payment', name: 'Payment', icon: 'card-outline' },
-    { id: 'account', name: 'Account', icon: 'person-outline' }
+    { id: 'scan', name: 'Scan', icon: 'camera-outline' },
+    { id: 'quality', name: 'Quality', icon: 'ribbon-outline' },
+    { id: 'export', name: 'Export', icon: 'globe-outline' },
+    { id: 'technical', name: 'Technical', icon: 'construct-outline' },
+    { id: 'account', name: 'Account', icon: 'person-outline' },
   ];
 
   return (
-    <ScrollView 
-      horizontal 
+    <ScrollView
+      horizontal
       showsHorizontalScrollIndicator={false}
-      className="mb-6"
+      className="mb-5"
       contentContainerStyle={{ paddingHorizontal: 24 }}
     >
       <View className="flex-row" style={{ gap: 12 }}>
-        {categories.map((category) => (
+        {categories.map((c) => (
           <TouchableOpacity
-            key={category.id}
-            onPress={() => onCategoryChange(category.id)}
+            key={c.id}
+            onPress={() => onCategoryChange(c.id)}
             className={`flex-row items-center px-4 py-2 rounded-full border ${
-              selectedCategory === category.id
+              selectedCategory === c.id
                 ? 'bg-primary border-primary'
                 : 'bg-white border-gray-200'
             }`}
           >
-            <Ionicons 
-              name={category.icon as any} 
-              size={16} 
-              color={selectedCategory === category.id ? 'white' : '#6b7280'} 
+            <Ionicons
+              name={c.icon as any}
+              size={16}
+              color={selectedCategory === c.id ? 'white' : '#6b7280'}
             />
-            <Text className={`ml-2 text-sm font-medium ${
-              selectedCategory === category.id ? 'text-white' : 'text-gray-700'
-            }`}>
-              {category.name}
+            <Text
+              className={`ml-2 text-sm font-medium ${
+                selectedCategory === c.id ? 'text-white' : 'text-gray-700'
+              }`}
+            >
+              {c.name}
             </Text>
           </TouchableOpacity>
         ))}
@@ -105,76 +114,85 @@ const CategoryFilter = ({
   );
 };
 
-// Expandable FAQ Item Component
-const FAQItemCard = ({ 
-  item, 
-  isExpanded, 
-  onToggle 
-}: { 
-  item: FAQItem; 
-  isExpanded: boolean; 
-  onToggle: () => void; 
+/* ---------------------------
+   Expandable FAQ card
+---------------------------- */
+const FAQItemCard = ({
+  item,
+  isExpanded,
+  onToggle,
+}: {
+  item: FAQItem;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) => {
   const rotateValue = useSharedValue(0);
   const heightValue = useSharedValue(0);
 
   useEffect(() => {
     rotateValue.value = withSpring(isExpanded ? 180 : 0);
-    heightValue.value = withTiming(isExpanded ? 1 : 0, { duration: 300 });
+    heightValue.value = withTiming(isExpanded ? 1 : 0, { duration: 260 });
   }, [isExpanded]);
 
-  const rotateStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotate: `${rotateValue.value}deg` }],
-    };
-  });
+  const rotateStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotateValue.value}deg` }],
+  }));
 
-  const expandStyle = useAnimatedStyle(() => {
-    return {
-      opacity: heightValue.value,
-      maxHeight: heightValue.value * 200, // Adjust based on content
-    };
-  });
+  const expandStyle = useAnimatedStyle(() => ({
+    opacity: heightValue.value,
+    maxHeight: heightValue.value * 220,
+  }));
+
+  const badgeBg =
+    item.category === 'scan'
+      ? 'bg-blue-100'
+      : item.category === 'quality'
+      ? 'bg-green-100'
+      : item.category === 'export'
+      ? 'bg-purple-100'
+      : item.category === 'technical'
+      ? 'bg-yellow-100'
+      : item.category === 'account'
+      ? 'bg-red-100'
+      : 'bg-gray-100';
+
+  const badgeColor =
+    item.category === 'scan'
+      ? '#3b82f6'
+      : item.category === 'quality'
+      ? '#10b981'
+      : item.category === 'export'
+      ? '#8b5cf6'
+      : item.category === 'technical'
+      ? '#f59e0b'
+      : item.category === 'account'
+      ? '#ef4444'
+      : '#6b7280';
 
   return (
     <TouchableOpacity
       onPress={onToggle}
       className="bg-white border border-gray-200 rounded-xl p-4 mb-3"
+      activeOpacity={0.9}
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-1 mr-3">
           <View className="flex-row items-center mb-2">
-            <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${
-              item.category === 'order' ? 'bg-blue-100' :
-              item.category === 'delivery' ? 'bg-green-100' :
-              item.category === 'shipping' ? 'bg-purple-100' :
-              item.category === 'payment' ? 'bg-yellow-100' :
-              item.category === 'account' ? 'bg-red-100' : 'bg-gray-100'
-            }`}>
-              <Ionicons 
-                name={item.icon as any} 
-                size={16} 
-                color={
-                  item.category === 'order' ? '#3b82f6' :
-                  item.category === 'delivery' ? '#10b981' :
-                  item.category === 'shipping' ? '#8b5cf6' :
-                  item.category === 'payment' ? '#f59e0b' :
-                  item.category === 'account' ? '#ef4444' : '#6b7280'
-                } 
-              />
+            <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${badgeBg}`}>
+              <Ionicons name={item.icon as any} size={16} color={badgeColor} />
             </View>
             <Text className="text-base font-semibold text-gray-900 flex-1">
               {item.question}
             </Text>
           </View>
-          
+
           <Animated.View style={expandStyle} className="overflow-hidden">
             <Text className="text-sm text-gray-600 leading-6 mt-2">
               {item.answer}
             </Text>
           </Animated.View>
         </View>
-        
+
         <Animated.View style={rotateStyle}>
           <Ionicons name="chevron-down" size={20} color="#6b7280" />
         </Animated.View>
@@ -183,16 +201,18 @@ const FAQItemCard = ({
   );
 };
 
-// FAQ Section Component
-const FAQSection = ({ 
-  faqItems, 
-  searchQuery, 
-  selectedCategory, 
-  expandedItems, 
+/* ---------------------------
+   FAQ Section
+---------------------------- */
+const FAQSection = ({
+  faqItems,
+  searchQuery,
+  selectedCategory,
+  expandedItems,
   onToggleExpand,
   showAll,
-  onViewAll
-}: { 
+  onViewAll,
+}: {
   faqItems: FAQItem[];
   searchQuery: string;
   selectedCategory: string;
@@ -201,31 +221,33 @@ const FAQSection = ({
   showAll: boolean;
   onViewAll: () => void;
 }) => {
-  // Filter FAQs based on search and category
-  const filteredFAQs = faqItems.filter((item) => {
-    const matchesSearch = searchQuery === '' || 
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    
+  const filtered = faqItems.filter((item) => {
+    const q = searchQuery.toLowerCase().trim();
+
+    const matchesSearch =
+      q === '' ||
+      item.question.toLowerCase().includes(q) ||
+      item.answer.toLowerCase().includes(q) ||
+      item.tags.some((t) => t.toLowerCase().includes(q));
+
+    const matchesCategory =
+      selectedCategory === 'all' || item.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
-  // Show only first 3 FAQs if not showing all and not searching
-  const displayFAQs = (searchQuery || showAll) ? filteredFAQs : filteredFAQs.slice(0, 3);
-  const hasMore = filteredFAQs.length > 3;
+  const display = searchQuery || showAll ? filtered : filtered.slice(0, 4);
+  const hasMore = filtered.length > 4;
 
-  if (filteredFAQs.length === 0) {
+  if (filtered.length === 0) {
     return (
       <View className="bg-white border border-gray-200 rounded-xl p-8 items-center justify-center mb-6">
         <Ionicons name="help-circle-outline" size={48} color="#d1d5db" />
         <Text className="text-lg font-semibold text-gray-500 mt-4 text-center">
-          No FAQs found
+          No results found
         </Text>
         <Text className="text-sm text-gray-400 mt-2 text-center">
-          Try adjusting your search or category filter
+          Try a different keyword or category
         </Text>
       </View>
     );
@@ -235,26 +257,19 @@ const FAQSection = ({
     <View className="mb-6">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-lg font-semibold text-gray-900">
-          {searchQuery ? `Search Results (${filteredFAQs.length})` : 'Frequently Asked'}
+          {searchQuery ? `Results (${filtered.length})` : 'Frequently Asked'}
         </Text>
-        {!searchQuery && hasMore && !showAll && (
+
+        {!searchQuery && hasMore && (
           <TouchableOpacity onPress={onViewAll}>
-            <Text className="text-sm text-primary font-medium">View All</Text>
+            <Text className="text-sm text-primary font-medium">
+              {showAll ? 'Show Less' : 'View All'}
+            </Text>
           </TouchableOpacity>
-        )}
-        {!searchQuery && showAll && (
-          <TouchableOpacity onPress={onViewAll}>
-            <Text className="text-sm text-gray-600 font-medium">Show Less</Text>
-          </TouchableOpacity>
-        )}
-        {searchQuery && (
-          <Text className="text-sm text-gray-500">
-            {filteredFAQs.length} found
-          </Text>
         )}
       </View>
 
-      {displayFAQs.map((item) => (
+      {display.map((item) => (
         <FAQItemCard
           key={item.id}
           item={item}
@@ -270,7 +285,7 @@ const FAQSection = ({
         >
           <View className="flex-row items-center">
             <Text className="text-base text-primary font-medium mr-2">
-              View {filteredFAQs.length - 3} More Questions
+              View {filtered.length - 4} More
             </Text>
             <Ionicons name="chevron-down" size={16} color="#2563eb" />
           </View>
@@ -280,33 +295,35 @@ const FAQSection = ({
   );
 };
 
-// Contact Form Component
-const ContactForm = ({ 
-  subject, 
-  description, 
-  onSubjectChange, 
-  onDescriptionChange, 
-  onSendMessage, 
-  onCallNow 
+/* ---------------------------
+   Contact Section
+---------------------------- */
+const ContactSection = ({
+  subject,
+  description,
+  onSubjectChange,
+  onDescriptionChange,
+  onSend,
+  onCall,
+  onEmail,
 }: {
   subject: string;
   description: string;
-  onSubjectChange: (text: string) => void;
-  onDescriptionChange: (text: string) => void;
-  onSendMessage: () => void;
-  onCallNow: () => void;
+  onSubjectChange: (t: string) => void;
+  onDescriptionChange: (t: string) => void;
+  onSend: () => void;
+  onCall: () => void;
+  onEmail: () => void;
 }) => (
-  <View className="mb-6">
-    <Text className="text-lg font-semibold text-gray-900 mb-2">
-      Still need help?
-    </Text>
-    <Text className="text-sm text-gray-600 leading-5 mb-6">
-      Can't find what you're looking for? Contact our support team and we'll get back to you within 48 hours.
+  <View className="mb-8">
+    <Text className="text-lg font-semibold text-gray-900 mb-2">Need more help?</Text>
+    <Text className="text-sm text-gray-600 leading-5 mb-5">
+      Send a message or contact our support team.
     </Text>
 
     <TextInput
       className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-700 mb-4"
-      placeholder="Subject of your problem"
+      placeholder="Subject (e.g., wrong grade / camera issue)"
       placeholderTextColor="#9ca3af"
       value={subject}
       onChangeText={onSubjectChange}
@@ -314,7 +331,7 @@ const ContactForm = ({
 
     <TextInput
       className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-700 mb-5 min-h-[120px]"
-      placeholder="Describe your problem in detail"
+      placeholder="Describe the issue (include resin type, lighting, phone model if needed)"
       placeholderTextColor="#9ca3af"
       value={description}
       onChangeText={onDescriptionChange}
@@ -326,179 +343,179 @@ const ContactForm = ({
     <View className="flex-row" style={{ gap: 12 }}>
       <TouchableOpacity
         className="flex-1 bg-primary rounded-lg py-3.5 items-center justify-center"
-        onPress={onSendMessage}
+        onPress={onSend}
       >
         <Text className="text-white text-base font-semibold">Send Message</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="flex-1 bg-primary rounded-lg py-3.5 items-center justify-center flex-row"
-        onPress={onCallNow}
+        className="flex-1 bg-white border border-gray-200 rounded-lg py-3.5 items-center justify-center flex-row"
+        onPress={onEmail}
       >
-        <Ionicons name="call" size={16} color="white" />
-        <Text className="text-white text-base font-semibold ml-1.5">Call Support</Text>
+        <Ionicons name="mail-outline" size={16} color="#111827" />
+        <Text className="text-gray-900 text-base font-semibold ml-1.5">Email</Text>
       </TouchableOpacity>
     </View>
+
+    <TouchableOpacity
+      className="mt-3 bg-white border border-gray-200 rounded-lg py-3.5 items-center justify-center flex-row"
+      onPress={onCall}
+    >
+      <Ionicons name="call-outline" size={16} color="#111827" />
+      <Text className="text-gray-900 text-base font-semibold ml-1.5">Call Support</Text>
+    </TouchableOpacity>
   </View>
 );
 
-// Main Component
-export default function HelpCenter() {
+/* ---------------------------
+   Main Screen
+---------------------------- */
+export default function HelpSupport() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [showAllFAQs, setShowAllFAQs] = useState(false);
+
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
 
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(30);
+  const translateY = useSharedValue(22);
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 600 });
-    translateY.value = withTiming(0, { duration: 600 });
+    opacity.value = withTiming(1, { duration: 550 });
+    translateY.value = withTiming(0, { duration: 550 });
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-      transform: [{ translateY: translateY.value }],
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
 
-  // Extended FAQ data with comprehensive questions and answers
-  const faqItems: FAQItem[] = [
-    {
-      id: '1',
-      question: 'How do I cancel an existing order?',
-      answer: 'You can cancel your order within 2 hours of placing it. Go to "My Orders" in your profile, find the order you want to cancel, and tap "Cancel Order". If the order has already been processed, you may need to contact support.',
-      icon: 'bag-handle-outline',
-      category: 'order',
-      tags: ['cancel', 'order', 'refund', 'stop']
-    },
-    {
-      id: '2',
-      question: 'What are the available delivery options?',
-      answer: 'We offer several delivery options: Standard delivery (3-5 business days), Express delivery (1-2 business days), and Same-day delivery (available in select cities). Delivery costs vary based on location and speed.',
-      icon: 'car-outline',
-      category: 'delivery',
-      tags: ['delivery', 'shipping', 'fast', 'same day', 'express']
-    },
-    {
-      id: '3',
-      question: 'What shipping methods do you offer?',
-      answer: 'We provide multiple shipping options including standard ground shipping, expedited shipping, overnight delivery, and international shipping. Shipping costs are calculated based on weight, dimensions, and destination.',
-      icon: 'airplane-outline',
-      category: 'shipping',
-      tags: ['shipping', 'international', 'overnight', 'ground']
-    },
-    {
-      id: '4',
-      question: 'What payment methods are accepted?',
-      answer: 'We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and bank transfers. All payments are processed securely through encrypted connections.',
-      icon: 'card-outline',
-      category: 'payment',
-      tags: ['payment', 'credit card', 'paypal', 'apple pay', 'secure']
-    },
-    {
-      id: '5',
-      question: 'How do I track my order?',
-      answer: 'Once your order ships, you\'ll receive a tracking number via email and SMS. You can also track your order in real-time by going to "My Orders" in your account and clicking on the specific order.',
-      icon: 'location-outline',
-      category: 'order',
-      tags: ['track', 'tracking', 'order status', 'delivery status']
-    },
-    {
-      id: '6',
-      question: 'How do I return or exchange items?',
-      answer: 'Items can be returned within 30 days of delivery. Go to "My Orders", select the item you want to return, and follow the return process. We provide free return shipping for defective items.',
-      icon: 'return-up-back-outline',
-      category: 'order',
-      tags: ['return', 'exchange', 'refund', 'defective', 'warranty']
-    },
-    {
-      id: '7',
-      question: 'How do I update my account information?',
-      answer: 'To update your account details, go to "Profile" > "Account Settings". You can change your personal information, delivery addresses, payment methods, and notification preferences.',
-      icon: 'person-outline',
-      category: 'account',
-      tags: ['account', 'profile', 'personal info', 'settings', 'address']
-    },
-    {
-      id: '8',
-      question: 'What if I received a damaged item?',
-      answer: 'If you receive a damaged item, please contact us immediately with photos of the damage. We\'ll arrange for a replacement or full refund, and provide a prepaid return label if needed.',
-      icon: 'alert-circle-outline',
-      category: 'order',
-      tags: ['damaged', 'broken', 'defective', 'replacement', 'quality']
-    },
-    {
-      id: '9',
-      question: 'Do you offer international shipping?',
-      answer: 'Yes, we ship to over 50 countries worldwide. International shipping costs and delivery times vary by destination. Customers are responsible for any customs duties or taxes.',
-      icon: 'globe-outline',
-      category: 'shipping',
-      tags: ['international', 'worldwide', 'customs', 'duties', 'global']
-    },
-    {
-      id: '10',
-      question: 'How can I contact customer support?',
-      answer: 'You can reach our customer support team 24/7 through live chat, email (support@company.com), or phone (+1-234-567-8900). We typically respond to emails within 4 hours.',
-      icon: 'chatbubble-outline',
-      category: 'general',
-      tags: ['support', 'contact', 'help', 'chat', 'email', 'phone']
-    }
-  ];
+  const faqItems: FAQItem[] = useMemo(
+    () => [
+      {
+        id: '1',
+        question: 'How do I scan resin/chips correctly for best accuracy?',
+        answer:
+          'Use bright natural light, keep the sample in focus, and fill the frame (avoid background clutter). Hold the phone steady and take 1–3 clear shots.',
+        icon: 'camera-outline',
+        category: 'scan',
+        tags: ['scan', 'camera', 'image', 'accuracy', 'lighting'],
+      },
+      {
+        id: '2',
+        question: 'What do Premium / Grade A / Grade B mean?',
+        answer:
+          'These grades indicate predicted quality based on the model’s learned patterns. Premium is highest, then Grade A, then Grade B. Always verify with expert checks if exporting.',
+        icon: 'ribbon-outline',
+        category: 'quality',
+        tags: ['premium', 'grade a', 'grade b', 'quality', 'grading'],
+      },
+      {
+        id: '3',
+        question: 'Why is my result low confidence?',
+        answer:
+          'Low confidence can happen due to blur, poor lighting, mixed samples, or unusual resin types. Try retaking the photo with better lighting and a clean background.',
+        icon: 'alert-circle-outline',
+        category: 'scan',
+        tags: ['confidence', 'low', 'blur', 'lighting', 'retake'],
+      },
+      {
+        id: '4',
+        question: 'What is export readiness in the app?',
+        answer:
+          'Export readiness is a guidance score/label that combines quality prediction with practical checks (consistency, moisture/cleanliness, packaging readiness). It is not a legal certification.',
+        icon: 'globe-outline',
+        category: 'export',
+        tags: ['export', 'readiness', 'packaging', 'moisture', 'checklist'],
+      },
+      {
+        id: '5',
+        question: 'The app shows wrong grade sometimes. What should I do?',
+        answer:
+          'Try better lighting, closer framing, and scan from multiple angles. If still wrong, submit a report via support with your photo + details so we can improve the dataset.',
+        icon: 'bug-outline',
+        category: 'technical',
+        tags: ['wrong', 'grade', 'bug', 'report', 'improve'],
+      },
+      {
+        id: '6',
+        question: 'Can I use the app without creating an account?',
+        answer:
+          'Some features may work without an account, but saving history, exporting reports, and personalized settings usually require login.',
+        icon: 'person-outline',
+        category: 'account',
+        tags: ['account', 'login', 'history', 'settings'],
+      },
+      {
+        id: '7',
+        question: 'Camera not opening / black screen issue',
+        answer:
+          'Check permissions (Camera access), restart the app, and try again. If you use Android, also check battery optimization restrictions for the app.',
+        icon: 'construct-outline',
+        category: 'technical',
+        tags: ['camera', 'permission', 'black screen', 'android', 'ios'],
+      },
+      {
+        id: '8',
+        question: 'How do I contact AgarVision support?',
+        answer:
+          'You can email support or call directly from this page. Include your issue, screenshots, and phone model for faster help.',
+        icon: 'chatbubble-ellipses-outline',
+        category: 'general',
+        tags: ['support', 'contact', 'email', 'call'],
+      },
+    ],
+    []
+  );
 
-  const handleToggleExpand = (id: string) => {
-    setExpandedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
+  const toggleExpand = (id: string) => {
+    setExpandedItems((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
-  const handleViewAll = () => {
-    setShowAllFAQs(!showAllFAQs);
-  };
-
-  const handleSendMessage = () => {
+  const handleSend = () => {
     if (!subject.trim() || !description.trim()) {
-      Alert.alert('Missing Information', 'Please fill in both subject and description fields.');
+      Alert.alert('Missing Information', 'Please fill Subject and Description.');
       return;
     }
-
     Alert.alert(
-      'Message Sent Successfully',
-      'Thank you for contacting us! Our support team will review your message and get back to you within 48 hours.',
-      [{
-        text: 'OK', 
-        onPress: () => {
-          setSubject('');
-          setDescription('');
-        }
-      }]
+      'Submitted',
+      'Thanks! Our team will review your message and respond soon.',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            setSubject('');
+            setDescription('');
+          },
+        },
+      ]
     );
   };
 
-  const handleCallNow = () => {
-    const phoneNumber = 'tel:+1234567890';
-    Linking.canOpenURL(phoneNumber)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(phoneNumber);
-        } else {
-          Alert.alert('Unable to Call', 'Phone calls are not supported on this device. Please try contacting us through email or chat.');
-        }
-      })
-      .catch((err) => console.error('Error opening phone:', err));
+  const SUPPORT_PHONE = 'tel:+1234567890';
+  const SUPPORT_EMAIL = 'mailto:support@agarvision.com';
+
+  const handleCall = () => {
+    Linking.openURL(SUPPORT_PHONE).catch(() =>
+      Alert.alert('Error', 'Unable to make phone call')
+    );
+  };
+
+  const handleEmail = () => {
+    Linking.openURL(SUPPORT_EMAIL).catch(() =>
+      Alert.alert('Error', 'Unable to open email app')
+    );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <Header title="Help Center" />
-      
-      <KeyboardAvoidingView 
+      <Header title="Help & Support" />
+
+      <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
@@ -511,41 +528,41 @@ export default function HelpCenter() {
         >
           <View className="px-6">
             <Animated.View style={animatedStyle} className="py-6">
-              {/* Main Title */}
               <Text className="text-2xl font-bold text-gray-900 mb-2">
-                How can we help you?
+                How can we help?
               </Text>
               <Text className="text-base text-gray-600 mb-6">
-                Search our FAQ or contact support for quick assistance
+                Search FAQs or contact AgarVision support.
               </Text>
 
-              <SearchBar 
-                searchQuery={searchQuery} 
-                onSearchChange={setSearchQuery} 
-              />
+              <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
               <CategoryFilter
                 selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
+                onCategoryChange={(c) => {
+                  setSelectedCategory(c);
+                  setShowAllFAQs(false);
+                }}
               />
 
-              <FAQSection 
+              <FAQSection
                 faqItems={faqItems}
                 searchQuery={searchQuery}
                 selectedCategory={selectedCategory}
                 expandedItems={expandedItems}
-                onToggleExpand={handleToggleExpand}
+                onToggleExpand={toggleExpand}
                 showAll={showAllFAQs}
-                onViewAll={handleViewAll}
+                onViewAll={() => setShowAllFAQs((p) => !p)}
               />
 
-              <ContactForm
+              <ContactSection
                 subject={subject}
                 description={description}
                 onSubjectChange={setSubject}
                 onDescriptionChange={setDescription}
-                onSendMessage={handleSendMessage}
-                onCallNow={handleCallNow}
+                onSend={handleSend}
+                onCall={handleCall}
+                onEmail={handleEmail}
               />
             </Animated.View>
           </View>
