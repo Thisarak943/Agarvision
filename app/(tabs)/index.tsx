@@ -84,12 +84,37 @@ export default function Home() {
   const [showNotificationSlide, setShowNotificationSlide] = useState(false);
   const [showSettingsSlide, setShowSettingsSlide] = useState(false);
 
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: 1, title: 'Order Shipped', message: 'Your order #12345 has been shipped and is on its way', type: 'success' },
-    { id: 2, title: 'Payment Issue', message: 'There was an issue processing your payment for order #12346', type: 'error' },
-    { id: 3, title: 'New Products Available', message: 'Check out our latest collection of safety equipment', type: 'info' },
-    { id: 4, title: 'Account Security', message: 'Your password will expire in 7 days. Please update it soon.', type: 'warning' },
-  ]);
+ const [notifications, setNotifications] = useState<Notification[]>([
+  {
+    id: 1,
+    title: 'Prediction Completed',
+    message: 'Your agarwood scan result is ready. Tap to view the result.',
+    type: 'success',
+    read: false,
+  },
+  {
+    id: 2,
+    title: 'Grade Detected: Premium',
+    message: 'High resin density detected. Export-ready quality indicated.',
+    type: 'info',
+    read: false,
+  },
+  {
+    id: 3,
+    title: 'Export Readiness Warning',
+    message: 'Moisture seems high. Drying recommended before packaging.',
+    type: 'warning',
+    read: false,
+  },
+  {
+    id: 4,
+    title: 'Capture Tip',
+    message: 'Use natural light + plain background for best accuracy.',
+    type: 'info',
+    read: true,
+  },
+]);
+
 
   // Animations
   const headerOpacity = useSharedValue(0);
