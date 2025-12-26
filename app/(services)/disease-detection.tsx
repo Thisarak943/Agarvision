@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../../../components/ui/Header';
+import Header from '../../components/ui/Header';
 
 const ServiceButtons = () => {
   const items = [
@@ -35,15 +35,15 @@ const ServiceButtons = () => {
   );
 };
 
-export default function MarketPrice() {
+export default function DiseaseDetection() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <Header title="Market Price Forecasting" />
+      <Header title="Disease Detection" />
       <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
         <View className="bg-white rounded-2xl border border-gray-200 p-5 mb-4">
-          <Text className="text-lg font-bold text-gray-900 mb-2">Market Price Module</Text>
+          <Text className="text-lg font-bold text-gray-900 mb-2">Disease Detection Module</Text>
           <Text className="text-gray-600">
-            This page will be connected to the Market Price forecasting backend + model.
+            This page will be connected to the leaf disease model + backend.
           </Text>
         </View>
 

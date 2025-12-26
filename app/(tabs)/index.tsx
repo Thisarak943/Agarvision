@@ -144,7 +144,12 @@ export default function Home() {
   ];
 
   // ✅ SERVICES NOW HAVE ROUTES (REDIRECT)
-  const services = [
+  const services: Array<{
+    title: string;
+    description: string;
+    icon: any;
+    route: '/(services)/resin-grading' | '/(services)/disease-detection' | '/(services)/market-price' | '/(services)/stage-classification';
+  }> = [
     {
       title: 'Chips & Resin Grading',
       description: 'Efficient, reliable drives',
@@ -235,7 +240,7 @@ export default function Home() {
     switch (result.type) {
       case 'service': {
         const found = services.find((s) => s.title === result.title);
-        if (found?.route) router.push(found.route as any);
+        if (found?.route) router.push(found.route);
         break;
       }
       case 'special_service':
@@ -276,6 +281,7 @@ export default function Home() {
               Hello {displayUser?.firstname} {displayUser?.lastname}!
             </Text>
           </View>
+
           <View className="flex-row">
             <TouchableOpacity onPress={() => setShowNotificationSlide(true)} className="mr-4">
               <Ionicons name="notifications" size={24} color="#10B981" />
@@ -283,6 +289,7 @@ export default function Home() {
                 <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
               )}
             </TouchableOpacity>
+
             <TouchableOpacity onPress={() => setShowSettingsSlide(true)}>
               <Ionicons name="settings" size={24} color="#10B981" />
             </TouchableOpacity>
@@ -304,6 +311,7 @@ export default function Home() {
         {/* ===== PRODUCTS ===== */}
         <View className="px-6 mb-6" onLayout={onProductsLayout}>
           <Text className="text-2xl font-bold text-primary mb-4">Agarwood Products</Text>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -342,7 +350,7 @@ export default function Home() {
                 description={service.description}
                 icon={service.icon}
                 // ✅ REDIRECT HERE
-                onPress={() => router.push(service.route as any)}
+                onPress={() => router.push(service.route)}
                 accentColor="#10B981"
                 overlayIcon="camera-outline"
                 gradient={['#E8E8E8', '#FFFFFF']}
@@ -354,6 +362,7 @@ export default function Home() {
         {/* ===== ARTICLES ===== */}
         <View className="px-6 mb-6 mt-3" onLayout={onArticlesLayout}>
           <Text className="text-2xl font-bold text-primary mb-4">Articles</Text>
+
           {specialServices.map((item, index) => (
             <Animated.View key={item.title} entering={FadeInUp.delay(500 + index * 200)}>
               <SpecialServiceCard
@@ -408,7 +417,7 @@ export default function Home() {
       <SettingsSlideView
         visible={showSettingsSlide}
         onClose={() => setShowSettingsSlide(false)}
-        onNavigate={(screen) => router.push(screen)}
+        onNavigate={(screen) => router.push(screen as any)}
         onLogout={() => {
           Alert.alert('Logout', 'Are you sure you want to logout?', [
             { text: 'Cancel', style: 'cancel' },
