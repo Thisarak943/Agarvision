@@ -418,7 +418,7 @@ export default function Home() {
             { text: 'Logout', style: 'destructive', onPress: () => router.replace('/(auth)/welcome') },
           ]);
         }}
-        userInfo={{ name: 'John Doe', email: 'john@example.com' }}
+        userInfo={{ name: 'Thisara Kandage', email: 'thisara@gmail.com' }}
       />
     </SafeAreaView>
   );

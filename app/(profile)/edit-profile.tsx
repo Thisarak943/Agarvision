@@ -25,11 +25,11 @@ import Header from "../../components/ui/Header";
 export default function EditProfile() {
   // Initialize with mock user data - in real app, this would come from your user context/API
   const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
+    firstName: 'Thisara',
+    lastName: 'Kandage',
+    email: 'thisara@gmail.com',
     mobile: '+1234567890',
-    username: 'johndoe'
+    username: 'ThisaraK'
   });
 
   const [originalData, setOriginalData] = useState({});
