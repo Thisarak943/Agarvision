@@ -1,4 +1,4 @@
-// app/(tabs)/index.tsx  — UPDATED: Articles now show real news-style content
+// app/(tabs)/index.tsx
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -17,21 +17,12 @@ import Animated, {
 import NotificationSlideView from '../views/NotificationSlideView';
 import SettingsSlideView from '../views/SettingsSlideView';
 
-import EmbroiederyContent from '../../components/contents/Embroidery';
-import VFDContent from '../../components/contents/InternationalVFD';
-import SafetyShoesContent from '../../components/contents/SafetyShoes';
-import UniformsContent from '../../components/contents/Uniforms';
-
-import SpecialServiceModal from '../../components/modals/SpecialServiceModal';
-import GovernmentBuyersContent from '../../components/contents/GovernmentBuyers';
-import FRClothingContent from '../../components/contents/FRClothing';
-import BlackintonContent from '../../components/contents/Blackinton';
-
 import GlobalSearch from '../../components/GlobalSearch';
-import ServiceModal from '../../components/modals/ServiceModal';
 import CategoryCard from '../../components/ui/CategoryCard';
 import ServiceCard from '../../components/ui/ServiceCard';
 import SpecialServiceCard from '../../components/ui/SpecialServiceCard';
+
+import SpecialServiceModal from '../../components/modals/SpecialServiceModal';
 
 // NEW: real article content
 import MarketPricesArticle from '../../components/articles/MarketPricesArticle';
@@ -73,48 +64,43 @@ export default function Home() {
     return undefined;
   }, [params.section]);
 
-  const [activeModal, setActiveModal] = useState<string | null>(null);
   const [activeSSModal, setActiveSSModal] = useState<string | null>(null);
-
-  const openModal = (service: string) => setActiveModal(service);
-  const closeModal = () => setActiveModal(null);
   const openSSModal = (service: string) => setActiveSSModal(service);
   const closeSSModal = () => setActiveSSModal(null);
 
   const [showNotificationSlide, setShowNotificationSlide] = useState(false);
   const [showSettingsSlide, setShowSettingsSlide] = useState(false);
 
- const [notifications, setNotifications] = useState<Notification[]>([
-  {
-    id: 1,
-    title: 'Prediction Completed',
-    message: 'Your agarwood scan result is ready. Tap to view the result.',
-    type: 'success',
-    read: false,
-  },
-  {
-    id: 2,
-    title: 'Grade Detected: Premium',
-    message: 'High resin density detected. Export-ready quality indicated.',
-    type: 'info',
-    read: false,
-  },
-  {
-    id: 3,
-    title: 'Export Readiness Warning',
-    message: 'Moisture seems high. Drying recommended before packaging.',
-    type: 'warning',
-    read: false,
-  },
-  {
-    id: 4,
-    title: 'Capture Tip',
-    message: 'Use natural light + plain background for best accuracy.',
-    type: 'info',
-    read: true,
-  },
-]);
-
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: 1,
+      title: 'Prediction Completed',
+      message: 'Your agarwood scan result is ready. Tap to view the result.',
+      type: 'success',
+      read: false,
+    },
+    {
+      id: 2,
+      title: 'Grade Detected: Premium',
+      message: 'High resin density detected. Export-ready quality indicated.',
+      type: 'info',
+      read: false,
+    },
+    {
+      id: 3,
+      title: 'Export Readiness Warning',
+      message: 'Moisture seems high. Drying recommended before packaging.',
+      type: 'warning',
+      read: false,
+    },
+    {
+      id: 4,
+      title: 'Capture Tip',
+      message: 'Use natural light + plain background for best accuracy.',
+      type: 'info',
+      read: true,
+    },
+  ]);
 
   // Animations
   const headerOpacity = useSharedValue(0);
@@ -151,20 +137,41 @@ export default function Home() {
 
   // ----- Data -----
   const categories = [
-    { title: 'Chips',    icon: require('../../assets/icons/chips.png') },
-    { title: 'Oud Oil',  icon: require('../../assets/icons/oil.png') },
+    { title: 'Chips', icon: require('../../assets/icons/chips.png') },
+    { title: 'Oud Oil', icon: require('../../assets/icons/oil.png') },
     { title: 'Perfumes', icon: require('../../assets/icons/perfume.png') },
-    { title: 'Incence',  icon: require('../../assets/icons/incence.png') },
+    { title: 'Incence', icon: require('../../assets/icons/incence.png') },
   ];
 
+  // ✅ SERVICES NOW HAVE ROUTES (REDIRECT)
   const services = [
-    { title: 'Chips & Resin Grading',    description: 'Efficient, reliable drives', icon: require('../../assets/icons/good.png') },
-    { title: 'Disease Detection',        description: 'Durable workwear solutions', icon: require('../../assets/icons/leda.png') },
-    { title: 'Market Price Forecasting', description: 'Protection with comfort',    icon: require('../../assets/icons/mprice.png') },
-    { title: 'Stage Classification',     description: 'Sharp, precise stitching',   icon: require('../../assets/icons/data.png') },
+    {
+      title: 'Chips & Resin Grading',
+      description: 'Efficient, reliable drives',
+      icon: require('../../assets/icons/good.png'),
+      route: '/(services)/resin-grading',
+    },
+    {
+      title: 'Disease Detection',
+      description: 'Durable workwear solutions',
+      icon: require('../../assets/icons/leda.png'),
+      route: '/(services)/disease-detection',
+    },
+    {
+      title: 'Market Price Forecasting',
+      description: 'Protection with comfort',
+      icon: require('../../assets/icons/mprice.png'),
+      route: '/(services)/market-price',
+    },
+    {
+      title: 'Stage Classification',
+      description: 'Sharp, precise stitching',
+      icon: require('../../assets/icons/data.png'),
+      route: '/(services)/stage-classification',
+    },
   ];
 
-  // (Internally still named specialServices; UI shows "Articles")
+  // (Articles)
   const specialServices = [
     {
       title: 'Global Agarwood Market Prices on the Rise',
@@ -217,18 +224,20 @@ export default function Home() {
 
   // Map category titles -> slugs for (products)/[category]
   const titleToSlug: Record<string, string> = {
-    'Chips': 'chips',
+    Chips: 'chips',
     'Oud Oil': 'oud-oil',
-    'Perfumes': 'perfumes',
-    'Incence': 'incence',
+    Perfumes: 'perfumes',
+    Incence: 'incence',
   };
 
-  // Search selection
+  // ✅ Search selection updated: when selecting a service, redirect
   const handleSearchResultSelect = (result: SearchResult) => {
     switch (result.type) {
-      case 'service':
-        openModal(result.title);
+      case 'service': {
+        const found = services.find((s) => s.title === result.title);
+        if (found?.route) router.push(found.route as any);
         break;
+      }
       case 'special_service':
         openSSModal(result.title);
         break;
@@ -325,33 +334,21 @@ export default function Home() {
         {/* ===== SERVICES ===== */}
         <View className="px-6 mb-6 mt-3" onLayout={onServicesLayout}>
           <Text className="text-2xl font-bold text-primary mb-4">Main Services</Text>
+
           {services.map((service) => (
             <Animated.View key={service.title} entering={FadeInUp.delay(500)}>
               <ServiceCard
                 title={service.title}
                 description={service.description}
                 icon={service.icon}
-                onPress={() => openModal(service.title)}
+                // ✅ REDIRECT HERE
+                onPress={() => router.push(service.route as any)}
                 accentColor="#10B981"
                 overlayIcon="camera-outline"
                 gradient={['#E8E8E8', '#FFFFFF']}
               />
             </Animated.View>
           ))}
-
-          {/* Service Modals (unchanged content components) */}
-          {activeModal === 'Chips & Resin Grading' && (
-            <ServiceModal visible={true} onClose={closeModal} title="Chips & Resin Grading" content={<VFDContent />} />
-          )}
-          {activeModal === 'Disease Detection' && (
-            <ServiceModal visible={true} onClose={closeModal} title="Disease Detection" content={<UniformsContent />} />
-          )}
-          {activeModal === 'Market Price Forecasting' && (
-            <ServiceModal visible={true} onClose={closeModal} title="Market Price Forecasting" content={<SafetyShoesContent />} />
-          )}
-          {activeModal === 'Stage Classification' && (
-            <ServiceModal visible={true} onClose={closeModal} title="Stage Classification" content={<EmbroiederyContent />} />
-          )}
         </View>
 
         {/* ===== ARTICLES ===== */}
@@ -371,7 +368,7 @@ export default function Home() {
           ))}
         </View>
 
-        {/* Article Modals — now render rich article bodies */}
+        {/* Article Modal */}
         {activeSSModal && (
           <SpecialServiceModal
             visible={true}
