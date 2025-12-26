@@ -15,6 +15,20 @@ export default function Settings() {
     },
     {
       id: 2,
+      title: 'Addresses',
+      subtitle: 'Manage your saved addresses',
+      icon: 'location-outline',
+      onPress: () => router.push('/(profile)/shipping-address'),
+    },
+    {
+      id: 3,
+      title: 'Payment Methods',
+      subtitle: 'Manage your payment options',
+      icon: 'card-outline',
+      onPress: () => router.push('/(profile)/payment-methods'),
+    },
+    {
+      id: 4,
       title: 'Change Password',
       subtitle: 'Update your account password',
       icon: 'lock-closed-outline',
@@ -22,41 +36,35 @@ export default function Settings() {
     },
   ];
 
+  // ✅ NEW: single dynamic page routes
   const otherItems = [
     {
-      id: 3,
-      title: 'Notifications',
-      subtitle: 'Manage notification preferences',
-      icon: 'notifications-outline',
-      onPress: () => router.push('/(profile)/notification-settings'),
-    },
-    {
-      id: 4,
-      title: 'Privacy & Security',
-      subtitle: 'Privacy settings and security options',
-      icon: 'shield-outline',
-      onPress: () => router.push('/(profile)/privacy-security'),
-    },
-    {
       id: 5,
-      title: 'Info Center',
-      subtitle: 'Guides, documents, and information',
-      icon: 'information-circle-outline',
-      onPress: () => router.push('/(profile)/info-center'),
+      title: 'History',
+      subtitle: 'View your scan / prediction history',
+      icon: 'time-outline',
+      onPress: () => router.push('/(profile)/info?type=history'),
     },
     {
       id: 6,
-      title: 'Help & Support',
-      subtitle: 'FAQs and contact support',
-      icon: 'help-circle-outline',
-      onPress: () => router.push('/(profile)/help-support'),
+      title: 'Contact',
+      subtitle: 'Call or contact support',
+      icon: 'call-outline',
+      onPress: () => router.push('/(profile)/info?type=contact'),
     },
     {
       id: 7,
-      title: 'Terms of Service',
-      subtitle: 'Read terms and conditions',
-      icon: 'document-text-outline',
-      onPress: () => router.push('/(profile)/terms-of-service'),
+      title: 'Email',
+      subtitle: 'Send us an email',
+      icon: 'mail-outline',
+      onPress: () => router.push('/(profile)/info?type=email'),
+    },
+    {
+      id: 8,
+      title: 'About Us',
+      subtitle: 'About AgarVision',
+      icon: 'information-circle-outline',
+      onPress: () => router.push('/(profile)/info?type=about'),
     },
   ];
 
@@ -72,7 +80,9 @@ export default function Settings() {
         </View>
 
         <View className="flex-1">
-          <Text className="text-base font-medium text-gray-900 mb-1">{item.title}</Text>
+          <Text className="text-base font-medium text-gray-900 mb-1">
+            {item.title}
+          </Text>
           <Text className="text-sm text-gray-500">{item.subtitle}</Text>
         </View>
 
@@ -86,6 +96,7 @@ export default function Settings() {
       <Header title="Settings" />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Account Section */}
         <View className="mt-6">
           <Text className="text-sm font-medium text-gray-500 uppercase tracking-wide px-6 mb-3">
             Account
@@ -93,11 +104,25 @@ export default function Settings() {
           <View className="bg-white">{settingsItems.map(renderSettingItem)}</View>
         </View>
 
+        {/* Other Section */}
         <View className="mt-8">
           <Text className="text-sm font-medium text-gray-500 uppercase tracking-wide px-6 mb-3">
-            Other
+            Info
           </Text>
           <View className="bg-white">{otherItems.map(renderSettingItem)}</View>
+        </View>
+
+        {/* Optional: Sign Out (if you want UI only) */}
+        <View className="mt-10 px-6 pb-10">
+          <TouchableOpacity
+            className="bg-red-50 border border-red-200 rounded-xl py-4 items-center"
+            onPress={() => {
+              // put your logout logic here
+              router.replace('/login'); // change if your login route different
+            }}
+          >
+            <Text className="text-red-600 font-semibold">Sign Out</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
