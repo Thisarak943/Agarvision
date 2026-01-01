@@ -234,7 +234,7 @@ export default function NotificationSlideView({
             <View className="px-6 py-3 bg-gray-50 border-b border-gray-100">
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
-                  <Ionicons name="settings" size={16} color="#6B7280" />
+                  <Ionicons name="settings" size={16} color="#6B7288" />
                   <Text className="text-sm text-gray-600 ml-2">Push Notifications</Text>
                 </View>
                 <Switch
