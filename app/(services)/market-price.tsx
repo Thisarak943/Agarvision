@@ -4,7 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/ui/Header';
 
-// service buttons list
+// service buttons list updated
 const ServiceButtons = () => {
   const items = [
     { title: 'Resin Grading', icon: 'flask-outline', route: '/(services)/resin-grading' },
