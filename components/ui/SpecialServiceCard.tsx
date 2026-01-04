@@ -100,7 +100,7 @@ const SpecialServiceCard: React.FC<SpecialServiceCardProps> = ({
               <Text className="text-xs text-gray-400 mr-2">Tap to view</Text>
               <Ionicons 
                 name="chevron-forward-circle" 
-                size={20} 
+                size={19} 
                 color={featured ? '#10B981' : '#D1D5DB'} 
               />
             </View>
