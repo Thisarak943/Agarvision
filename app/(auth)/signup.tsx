@@ -1,36 +1,37 @@
 // app/(auth)/signup.tsx
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
+import React, { useState, useEffect } from "react";
+import {
+  View,
   Text,
-  TouchableOpacity, 
-  Alert, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform 
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  withDelay 
-} from 'react-native-reanimated';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
-// import { authAPI } from '../../services/api'; // COMMENTED OUT - Backend API
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+import { authAPI } from "../../services/api"; // ✅ backend
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    mobile: '',
-    shippingAddress: '',
-    password: '',
-    confirmPassword: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: "",
+    shippingAddress: "",
+    password: "",
+    confirmPassword: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -50,99 +51,87 @@ export default function SignUp() {
   });
 
   const updateFormData = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Email validation
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Mobile validation (10 digits)
   const isValidMobile = (mobile: string) => {
     const mobileRegex = /^\d{10}$/;
     return mobileRegex.test(mobile);
   };
 
-  // Password validation (minimum 8 characters, at least one letter and one number)
   const isValidPassword = (password: string) => {
-    return password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password);
+    return (
+      password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password)
+    );
   };
 
   const validateStep1 = () => {
     if (!formData.firstName.trim()) {
-      Alert.alert('Validation Error', 'Please enter your first name');
+      Alert.alert("Validation Error", "Please enter your first name");
       return false;
     }
-
     if (!formData.lastName.trim()) {
-      Alert.alert('Validation Error', 'Please enter your last name');
+      Alert.alert("Validation Error", "Please enter your last name");
       return false;
     }
-
     if (!formData.email.trim()) {
-      Alert.alert('Validation Error', 'Please enter your email address');
+      Alert.alert("Validation Error", "Please enter your email address");
       return false;
     }
-
-    if (!isValidEmail(formData.email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
+    if (!isValidEmail(formData.email.trim())) {
+      Alert.alert("Validation Error", "Please enter a valid email address");
       return false;
     }
-
     if (!formData.mobile.trim()) {
-      Alert.alert('Validation Error', 'Please enter your mobile number');
+      Alert.alert("Validation Error", "Please enter your mobile number");
       return false;
     }
-
-    if (!isValidMobile(formData.mobile)) {
-      Alert.alert('Validation Error', 'Please enter a valid 10-digit mobile number');
+    if (!isValidMobile(formData.mobile.trim())) {
+      Alert.alert("Validation Error", "Please enter a valid 10-digit mobile number");
       return false;
     }
-
     if (!formData.shippingAddress.trim()) {
-      Alert.alert('Validation Error', 'Please enter your shipping address');
+      Alert.alert("Validation Error", "Please enter your shipping address");
       return false;
     }
-
     return true;
   };
 
   const validateStep2 = () => {
     if (!formData.password.trim()) {
-      Alert.alert('Validation Error', 'Please enter a password');
+      Alert.alert("Validation Error", "Please enter a password");
       return false;
     }
-
-    if (!isValidPassword(formData.password)) {
+    if (!isValidPassword(formData.password.trim())) {
       Alert.alert(
-        'Validation Error', 
-        'Password must be at least 8 characters long and contain both letters and numbers'
+        "Validation Error",
+        "Password must be at least 8 characters long and contain both letters and numbers"
       );
       return false;
     }
-
     if (!formData.confirmPassword.trim()) {
-      Alert.alert('Validation Error', 'Please confirm your password');
+      Alert.alert("Validation Error", "Please confirm your password");
       return false;
     }
-
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Validation Error', 'Passwords do not match');
+      Alert.alert("Validation Error", "Passwords do not match");
       return false;
     }
-
     return true;
   };
 
   const handleNext = () => {
     if (currentStep === 1) {
-      if (!validateStep1()) {
-        return;
-      }
+      if (!validateStep1()) return;
+
       opacity.value = withTiming(0, { duration: 300 });
       translateX.value = withTiming(-50, { duration: 300 });
+
       setTimeout(() => {
         setCurrentStep(2);
         translateX.value = 50;
@@ -156,6 +145,7 @@ export default function SignUp() {
     if (currentStep === 2) {
       opacity.value = withTiming(0, { duration: 300 });
       translateX.value = withTiming(50, { duration: 300 });
+
       setTimeout(() => {
         setCurrentStep(1);
         translateX.value = -50;
@@ -166,70 +156,64 @@ export default function SignUp() {
   };
 
   const handleSignUp = async () => {
-    if (!validateStep2()) {
-      return;
-    }
+    if (!validateStep2()) return;
 
     setLoading(true);
-    
+
     try {
-      // Prepare user data for API - matching backend field names
       const userData = {
         firstname: formData.firstName.trim(),
         lastname: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
-        phone: `+1${formData.mobile}`, // Add USA country code
+        phone: `+1${formData.mobile.trim()}`,
         address: formData.shippingAddress.trim(),
         password: formData.password.trim(),
       };
 
-      // COMMENTED OUT - Backend API call
-      // const response = await authAPI.register(userData);
-      
-      // Simulated registration for frontend testing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Registration data (Frontend Only):', userData);
+      const response = await authAPI.register(userData);
+      console.log("Register success:", response);
 
       setLoading(false);
 
-      // Show success message with verification email notice
       Alert.alert(
-        'Registration Successful',
-        `A verification email has been sent to ${formData.email}. Please check your inbox and verify your email address before logging in.`,
+        "Registration Successful",
+        "Account created successfully. You can login now.",
         [
           {
-            text: 'OK',
-            onPress: () => {
-              // Redirect to login screen
-              router.replace('/login');
-            }
-          }
+            text: "OK",
+            onPress: () => router.replace("/(auth)/login"),
+          },
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      Alert.alert(
-        'Registration Failed',
-        error.message || 'An error occurred during registration. Please try again.'
-      );
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "An error occurred during registration. Please try again.";
+
+      Alert.alert("Registration Failed", msg);
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView 
-        className="flex-1" 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           className="flex-1 px-6"
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View className="py-6">
-            <Text className="text-2xl font-bold text-gray-900 text-center">Sign up</Text>
+            <Text className="text-2xl font-bold text-gray-900 text-center">
+              Sign up
+            </Text>
             <Text className="text-sm text-gray-500 text-center mt-2">
               Step {currentStep} of 2
             </Text>
@@ -242,7 +226,7 @@ export default function SignUp() {
                   label="First Name"
                   placeholder="Enter your first name"
                   value={formData.firstName}
-                  onChangeText={(text) => updateFormData('firstName', text)}
+                  onChangeText={(text) => updateFormData("firstName", text)}
                   autoCapitalize="words"
                 />
 
@@ -250,7 +234,7 @@ export default function SignUp() {
                   label="Last Name"
                   placeholder="Enter your last name"
                   value={formData.lastName}
-                  onChangeText={(text) => updateFormData('lastName', text)}
+                  onChangeText={(text) => updateFormData("lastName", text)}
                   autoCapitalize="words"
                 />
 
@@ -258,7 +242,7 @@ export default function SignUp() {
                   label="Email"
                   placeholder="Enter your email address"
                   value={formData.email}
-                  onChangeText={(text) => updateFormData('email', text)}
+                  onChangeText={(text) => updateFormData("email", text)}
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
@@ -276,9 +260,8 @@ export default function SignUp() {
                         placeholder="Enter your mobile number"
                         value={formData.mobile}
                         onChangeText={(text) => {
-                          // Only allow digits and limit to 10 characters
-                          const cleaned = text.replace(/[^0-9]/g, '').slice(0, 10);
-                          updateFormData('mobile', cleaned);
+                          const cleaned = text.replace(/[^0-9]/g, "").slice(0, 10);
+                          updateFormData("mobile", cleaned);
                         }}
                         keyboardType="phone-pad"
                         maxLength={10}
@@ -291,7 +274,7 @@ export default function SignUp() {
                   label="Shipping Address"
                   placeholder="Enter the shipping address"
                   value={formData.shippingAddress}
-                  onChangeText={(text) => updateFormData('shippingAddress', text)}
+                  onChangeText={(text) => updateFormData("shippingAddress", text)}
                   multiline
                   numberOfLines={3}
                 />
@@ -302,7 +285,7 @@ export default function SignUp() {
                   label="Password"
                   placeholder="Enter a password"
                   value={formData.password}
-                  onChangeText={(text) => updateFormData('password', text)}
+                  onChangeText={(text) => updateFormData("password", text)}
                   secureTextEntry
                 />
                 <Text className="text-xs text-gray-500 -mt-2">
@@ -313,7 +296,7 @@ export default function SignUp() {
                   label="Re-enter Password"
                   placeholder="Re-enter the password"
                   value={formData.confirmPassword}
-                  onChangeText={(text) => updateFormData('confirmPassword', text)}
+                  onChangeText={(text) => updateFormData("confirmPassword", text)}
                   secureTextEntry
                 />
               </View>

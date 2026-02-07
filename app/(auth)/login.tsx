@@ -1,29 +1,30 @@
 // app/(auth)/login.tsx
-import React, { useState, useEffect } from 'react';
-// import { authAPI } from '../../services/api'; // COMMENTED OUT - Backend API
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Alert, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform 
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
-  withDelay 
-} from 'react-native-reanimated';
-import Input from '../../components/ui/Input';
-import Button from '../../components/ui/Button';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+} from "react-native-reanimated";
+
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+import { authAPI } from "../../services/api"; // ✅ ONLY ONCE
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
 
@@ -42,183 +43,108 @@ export default function Login() {
     };
   });
 
-  // Email validation
-  const isValidEmail = (email: string) => {
+  const isValidEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(value);
   };
 
-  const handleResendVerification = async (unverifiedEmail: string) => {
+  const handleResendVerification = async (_unverifiedEmail: string) => {
     setResendingVerification(true);
-    
     try {
-      // COMMENTED OUT - Backend API call
-      // const response = await authAPI.resendVerification(unverifiedEmail);
-      
-      // Simulated response for frontend testing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // If you add a backend endpoint later:
+      // await authAPI.resendVerification(_unverifiedEmail);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       Alert.alert(
-        'Verification Email Sent',
-        'A new verification email has been sent. Please check your inbox.'
+        "Verification Email Sent",
+        "A new verification email has been sent. Please check your inbox."
       );
-    } catch (error) {
-      Alert.alert(
-        'Failed to Resend',
-        error.message || 'Could not resend verification email. Please try again later.'
-      );
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Could not resend verification email.";
+      Alert.alert("Failed to Resend", msg);
     } finally {
       setResendingVerification(false);
     }
   };
 
   const handleLogin = async () => {
-    // Validate inputs
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail || !cleanPassword) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
-    if (!isValidEmail(email.trim())) {
-      Alert.alert('Error', 'Please enter a valid email address');
+    if (!isValidEmail(cleanEmail)) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
     setLoading(true);
 
     try {
-      // COMMENTED OUT - Backend API call
-      // const response = await authAPI.login(email, password);
-      
-      // Simulated login for frontend testing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Handle successful login
-      console.log('Login successful (Frontend Only)');
-      
+      const response = await authAPI.login(cleanEmail, cleanPassword);
+      console.log("Login success:", response);
+
       setLoading(false);
-      
-      // Navigate to loading/home screen
-      router.replace('/loading');
-      
-    } catch (error) {
+      router.replace("/loading");
+    } catch (error: any) {
       setLoading(false);
-      
-      // Check if error response contains unverified email info
-      if (error.unverified_email && error.can_resend_verification) {
-        // Show alert with resend verification option
-        Alert.alert(
-          'Email Not Verified',
-          error.message || 'Please verify your email address first',
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel'
-            },
-            {
-              text: 'Resend Verification',
-              onPress: () => handleResendVerification(error.unverified_email)
-            }
-          ]
-        );
-      } else {
-        // Show generic error
-        Alert.alert('Login Failed', error.message || 'Invalid email or password');
+
+      const data = error?.response?.data;
+      const msg =
+        data?.message || error?.message || "Login failed. Please try again.";
+
+      if (data?.unverified_email && data?.can_resend_verification) {
+        Alert.alert("Email Not Verified", msg, [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: resendingVerification ? "Sending..." : "Resend Verification",
+            onPress: () => handleResendVerification(data.unverified_email),
+          },
+        ]);
+        return;
       }
+
+      Alert.alert("Login Failed", msg);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    
-    try {
-      // COMMENTED OUT - Backend API call
-      // const response = await authAPI.googleSignIn();
-      
-      // Simulated Google sign-in for frontend testing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setLoading(false);
-      
-      // Handle successful Google sign-in
-      console.log('Google sign-in successful (Frontend Only)');
-      
-      // Navigate to loading/home screen
-      router.replace('/loading');
-      
-    } catch (error) {
-      setLoading(false);
-      Alert.alert(
-        'Google Sign-In Failed',
-        error.message || 'Could not sign in with Google. Please try again.'
-      );
-    }
+    Alert.alert(
+      "Not Implemented",
+      "Google Sign-In needs backend + Google config. We can add it next."
+    );
   };
 
   const handleForgotPassword = () => {
-    // Show input dialog for email
-    Alert.prompt(
-      'Forgot Password',
-      'Enter your email address to receive password reset instructions',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel'
-        },
-        {
-          text: 'Send',
-          onPress: async (inputEmail) => {
-            if (!inputEmail || !inputEmail.trim()) {
-              Alert.alert('Error', 'Please enter your email address');
-              return;
-            }
-
-            if (!isValidEmail(inputEmail.trim())) {
-              Alert.alert('Error', 'Please enter a valid email address');
-              return;
-            }
-
-            try {
-              // COMMENTED OUT - Backend API call
-              // const response = await authAPI.forgotPassword(inputEmail.trim());
-              
-              // Simulated response for frontend testing
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              
-              Alert.alert(
-                'Email Sent',
-                'Password reset instructions have been sent to your email'
-              );
-            } catch (error) {
-              Alert.alert(
-                'Error',
-                error.message || 'Could not send password reset email. Please try again.'
-              );
-            }
-          }
-        }
-      ],
-      'plain-text',
-      '',
-      'email-address'
+    Alert.alert(
+      "Not Implemented",
+      "Forgot password needs a backend endpoint. We can add it next."
     );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <KeyboardAvoidingView 
-        className="flex-1" 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           className="flex-1 px-6"
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View className="py-6">
-            <Text className="text-2xl font-bold text-gray-900 text-center">Login</Text>
+            <Text className="text-2xl font-bold text-gray-900 text-center">
+              Login
+            </Text>
           </View>
 
           <Animated.View style={animatedStyle} className="flex-1 justify-center">
@@ -240,9 +166,10 @@ export default function Login() {
                 secureTextEntry
               />
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="self-end mb-6"
                 onPress={handleForgotPassword}
+                disabled={loading}
               >
                 <Text className="text-primary text-sm">Forgot Password?</Text>
               </TouchableOpacity>
@@ -264,7 +191,10 @@ export default function Login() {
 
               <View className="flex-row justify-center">
                 <Text className="text-gray-600">Don't have an account? </Text>
-                <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+                <TouchableOpacity
+                  onPress={() => router.push("/(auth)/signup")}
+                  disabled={loading}
+                >
                   <Text className="text-primary font-semibold">Sign Up</Text>
                 </TouchableOpacity>
               </View>
