@@ -66,9 +66,9 @@ export default function DiseaseDetection() {
           {/* HISTORY */}
           <TouchableOpacity
             onPress={() => router.push("/(services)/disease-history")}
-            className="bg-white border-2 border-green-200 rounded-xl py-4 mt-3"
+            className="bg-green-100 border-2 border-green-400 rounded-xl py-4 mt-3"
           >
-            <Text className="text-center font-semibold text-gray-900">
+            <Text className="text-center font-semibold text-green-700">
               View Prediction History
             </Text>
           </TouchableOpacity>
