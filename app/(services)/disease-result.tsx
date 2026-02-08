@@ -10,9 +10,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/ui/Header";
 import { predictDisease } from "../../services/diseaseApi";
+import { saveDiseaseHistory } from "../../services/diseaseHistoryApi";
 import { Ionicons } from "@expo/vector-icons";
 
-/* 🔴 UPDATED CONFIDENCE BADGE ONLY */
+/* 🔴 Confidence badge (your red theme) */
 function ConfidenceBadge({ value }: { value: number }) {
   const pct = Math.round((value ?? 0) * 100);
 
@@ -60,8 +61,20 @@ export default function DiseaseResult() {
 
     (async () => {
       try {
+        // 1) predict from FastAPI
         const res = await predictDisease(image);
         setData(res);
+
+        // 2) save to MongoDB (Express)
+        try {
+          await saveDiseaseHistory({
+            ...res,
+            imageUri: image,
+          });
+        } catch (saveErr) {
+          // don’t block UI if saving fails
+          console.log("History save failed:", saveErr);
+        }
       } catch (e: any) {
         setError(e?.message || "Prediction failed. Please try again.");
       }
@@ -108,6 +121,7 @@ export default function DiseaseResult() {
 
   const predicted = data?.predicted_disease ?? "Unknown";
   const confidence = Number(data?.confidence ?? 0);
+
   const top1 = data?.top2?.top1;
   const top2 = data?.top2?.top2;
   const gap = data?.top2?.gap;
@@ -125,10 +139,7 @@ export default function DiseaseResult() {
     <SafeAreaView className="flex-1 bg-green-100">
       <Header title="Disease Detection" />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 32 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
         <View className="px-6 py-6">
           <View className="bg-white rounded-2xl border-2 border-green-200 p-6">
             {/* Header */}
@@ -149,8 +160,7 @@ export default function DiseaseResult() {
             <View className="h-[1px] bg-green-500/30 my-5" />
 
             <Text className="text-gray-700">
-              Detected Disease:{" "}
-              <Text className="font-semibold">{predicted}</Text>
+              Detected Disease: <Text className="font-semibold">{predicted}</Text>
             </Text>
 
             <Text className="text-gray-700 mt-2">
@@ -183,18 +193,14 @@ export default function DiseaseResult() {
 
             {allProbs.length > 0 && (
               <View className="mt-5">
-                <Text className="font-semibold mb-2">
-                  Probability Breakdown
-                </Text>
+                <Text className="font-semibold mb-2">Probability Breakdown</Text>
 
                 <View className="border border-gray-200 rounded-xl overflow-hidden">
                   {allProbs.map((p, idx) => (
                     <View
                       key={p.label}
                       className={`px-4 py-3 ${
-                        idx !== allProbs.length - 1
-                          ? "border-b border-gray-200"
-                          : ""
+                        idx !== allProbs.length - 1 ? "border-b border-gray-200" : ""
                       }`}
                     >
                       <View className="flex-row justify-between mb-1">
@@ -204,10 +210,7 @@ export default function DiseaseResult() {
                         </Text>
                       </View>
                       <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <View
-                          style={{ width: `${p.prob * 100}%` }}
-                          className="h-2 bg-green-500"
-                        />
+                        <View style={{ width: `${p.prob * 100}%` }} className="h-2 bg-green-500" />
                       </View>
                     </View>
                   ))}
@@ -233,8 +236,15 @@ export default function DiseaseResult() {
               onPress={() => router.replace("/(services)/disease-upload")}
               className="border-2 border-green-200 rounded-xl py-3 mt-3"
             >
-              <Text className="text-center font-semibold">
-                Test Another Image
+              <Text className="text-center font-semibold">Test Another Image</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push("/(services)/disease-history")}
+              className="bg-white border-2 border-green-200 rounded-xl py-3 mt-3"
+            >
+              <Text className="text-center font-semibold text-gray-900">
+                View Prediction History
               </Text>
             </TouchableOpacity>
           </View>
@@ -243,9 +253,7 @@ export default function DiseaseResult() {
             onPress={() => router.replace("/(tabs)")}
             className="bg-primary rounded-xl py-4 mt-6"
           >
-            <Text className="text-white text-center font-semibold">
-              Back to Home
-            </Text>
+            <Text className="text-white text-center font-semibold">Back to Home</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
