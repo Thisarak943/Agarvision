@@ -6,38 +6,57 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function DiseaseDetection() {
   return (
-    <SafeAreaView className="flex-1 bg-green-50">
+    <SafeAreaView className="flex-1 bg-green-100">
       <Header title="Disease Detection" />
 
       <View className="flex-1 px-6 justify-center">
-        <View className="bg-white rounded-2xl border border-gray-200 p-6 items-center">
-          <Ionicons name="leaf-outline" size={64} color="#111" />
+        {/* MAIN CARD */}
+        <View className="bg-white rounded-2xl border-2 border-green-200 p-6 items-center shadow-sm">
+          
+          {/* ICON BOX */}
+          <View className="w-20 h-20 rounded-2xl bg-green-50 border-2 border-green-300 items-center justify-center">
+            <Ionicons name="leaf-outline" size={42} color="#16a34a" />
+          </View>
 
-          <Text className="text-lg font-bold mt-4">
-            Disease Detection
+          <Text className="text-xl font-extrabold mt-4 text-gray-900">
+            Leaf Disease Detection
           </Text>
 
-          <Text className="text-gray-600 text-center mt-4">
-            Agarwood trees are vulnerable to diseases that affect growth and resin
-            quality. This AI-powered feature helps detect leaf diseases early.
+          <Text className="text-gray-600 text-center mt-3 leading-5">
+            Upload an agarwood leaf image and let our AI detect common leaf
+            diseases early—before they affect tree health and resin quality.
           </Text>
 
-          <View className="h-[1px] bg-green-500 w-full my-6" />
+          {/* DIVIDER */}
+          <View className="h-[1px] bg-green-400/50 w-full my-5" />
 
-          <Text className="text-gray-500 text-center">
-            Upload a clear leaf image to get instant diagnosis and treatment
-            suggestions.
+          {/* INFO BOX */}
+          <View className="w-full bg-green-50 border-2 border-green-200 rounded-xl p-4">
+            <Text className="text-green-900 font-semibold text-center">
+              Analysis Includes
+            </Text>
+            <Text className="text-green-900/80 text-center text-xs mt-2 leading-4">
+              Detected disease • confidence level • recommended remedies
+            </Text>
+          </View>
+
+          {/* NOTE */}
+          <Text className="text-gray-500 text-center text-xs mt-4">
+            Tip: Use good lighting and a focused leaf image for best accuracy.
           </Text>
         </View>
 
-        <TouchableOpacity
-          onPress={() => router.push("/(services)/disease-upload")}
-          className="bg-primary rounded-xl py-4 mt-6"
-        >
-          <Text className="text-white text-center font-semibold">
-            Get Started
-          </Text>
-        </TouchableOpacity>
+        {/* CTA */}
+        <View className="border-2 border-green-200 rounded-xl mt-6">
+          <TouchableOpacity
+            onPress={() => router.push("/(services)/disease-upload")}
+            className="bg-primary rounded-xl py-4"
+          >
+            <Text className="text-white text-center font-semibold">
+              Get Started
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
