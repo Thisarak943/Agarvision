@@ -11,6 +11,9 @@ export default function ServicesLayout() {
       <Stack.Screen name="disease-history" />
       <Stack.Screen name="market-price" />
       <Stack.Screen name="stage-classification" />
+      <Stack.Screen name="stage-upload" />
+      <Stack.Screen name="stage-result" />
+
     </Stack>
   );
 }

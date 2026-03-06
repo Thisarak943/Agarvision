@@ -1,55 +1,45 @@
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../../components/ui/Header';
-
-const ServiceButtons = () => {
-  const items = [
-    { title: 'Resin Grading', icon: 'flask-outline', route: '/(services)/resin-grading' },
-    { title: 'Disease Detection', icon: 'bug-outline', route: '/(services)/disease-detection' },
-    { title: 'Market Price', icon: 'trending-up-outline', route: '/(services)/market-price' },
-    { title: 'Stage Classification', icon: 'layers-outline', route: '/(services)/stage-classification' },
-  ];
-
-  return (
-    <View className="bg-white rounded-2xl border border-gray-200 p-4">
-      <Text className="text-sm font-semibold text-gray-500 mb-3">Go to another service</Text>
-      <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-        {items.map((it) => (
-          <TouchableOpacity
-            key={it.title}
-            onPress={() => router.push(it.route as any)}
-            className="w-[48%] bg-gray-50 border border-gray-200 rounded-xl p-4"
-          >
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-full bg-primary items-center justify-center mr-3">
-                <Ionicons name={it.icon as any} size={18} color="white" />
-              </View>
-              <Text className="font-semibold text-gray-900 text-sm flex-1">{it.title}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-};
+import { View, Text, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function StageClassification() {
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Header title="Stage Classification" />
-      <ScrollView className="flex-1 px-6 py-4" showsVerticalScrollIndicator={false}>
-        <View className="bg-white rounded-2xl border border-gray-200 p-5 mb-4">
-          <Text className="text-lg font-bold text-gray-900 mb-2">Stage Classification Module</Text>
-          <Text className="text-gray-600">
-            This page will be connected to Stage Classification backend + model.
-          </Text>
-        </View>
+  const router = useRouter();
 
-        <ServiceButtons />
-        <View className="h-16" />
-      </ScrollView>
-    </SafeAreaView>
+  return (
+    <View className="flex-1 bg-[#E6F2ED] p-5 justify-between">
+      
+      {/* Card */}
+      <View className="bg-white rounded-2xl p-6 mt-10 shadow-md">
+        <Text className="text-xl font-bold text-center mb-4">
+          Resin Induction Stage Classifier
+        </Text>
+
+        <Text className="text-center text-gray-600 leading-6">
+          Agarwood resin forms only when a tree is induced at the right stage.
+          Our system analyzes key parameters like age, diameter, and inoculation
+          history to determine whether a tree is{" "}
+          <Text className="font-semibold">
+            Too Early, Ready, or Over Mature
+          </Text>{" "}
+          for induction.
+        </Text>
+
+        <View className="border-b border-green-500 my-6" />
+
+        <Text className="text-center text-gray-500">
+          Make smarter decisions, reduce losses, and maximize resin production
+          with AI powered insights.
+        </Text>
+      </View>
+
+      {/* Button */}
+      <TouchableOpacity
+        onPress={() => router.push("/(services)/stage-upload")}
+        className="bg-green-600 py-4 rounded-xl mb-6"
+      >
+        <Text className="text-white text-center font-semibold text-lg">
+          Get Started
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
