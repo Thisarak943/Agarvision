@@ -8,7 +8,7 @@ import { getToken, saveToken, clearToken } from "./tokenStorage";
  * - iOS Simulator:     http://localhost:5000/api
  * - REAL phone (Expo Go): http://192.168.8.104:5000/api
  */
-const BASE_URL = "http://192.168.1.103:5000/api";
+const BASE_URL = "http://172.28.26.118:5000/api";
  // ✅ keep your value
 
 const USER_KEY = "USER_DATA";
