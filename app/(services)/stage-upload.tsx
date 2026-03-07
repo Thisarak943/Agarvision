@@ -291,9 +291,15 @@ export default function StageUpload() {
   };
 
   return (
-    <View className="flex-1 bg-[#E6F2ED] p-5 justify-between">
+    <View className="flex-1 bg-[#E6F2ED] px-5 pt-4 justify-between">
+      <View className="mt-2 mb-3">
+        <Text className="text-center text-xl font-semibold">
+          Resin Induction Stage Classifier
+        </Text>
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="bg-white rounded-2xl p-6 mt-6 shadow-md">
+        <View className="bg-white rounded-2xl p-6 mt-2 shadow-md">
           <Text className="text-lg font-semibold mb-4">Upload Your Image</Text>
 
           <TouchableOpacity
@@ -308,7 +314,12 @@ export default function StageUpload() {
               <Text className="text-gray-500">Select Image (Bark)</Text>
             )}
           </TouchableOpacity>
-          {imageError ? <Text className="text-red-500 mb-4">{imageError}</Text> : <View className="mb-4" />}
+
+          {imageError ? (
+            <Text className="text-red-500 mb-4">{imageError}</Text>
+          ) : (
+            <View className="mb-4" />
+          )}
 
           <Text className="mb-1">Tree Age</Text>
           <TextInput
@@ -319,9 +330,15 @@ export default function StageUpload() {
             }}
             placeholder="Enter age"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${ageError ? "border-red-500" : "border-gray-300"}`}
+            className={`border rounded-lg p-3 bg-white ${
+              ageError ? "border-red-500" : "border-gray-300"
+            }`}
           />
-          {ageError ? <Text className="text-red-500 mt-1 mb-4">{ageError}</Text> : <View className="mb-4" />}
+          {ageError ? (
+            <Text className="text-red-500 mt-1 mb-4">{ageError}</Text>
+          ) : (
+            <View className="mb-4" />
+          )}
 
           <Text className="mb-1">Diameter (cm)</Text>
           <TextInput
@@ -332,7 +349,9 @@ export default function StageUpload() {
             }}
             placeholder="Enter diameter"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${diameterError ? "border-red-500" : "border-gray-300"}`}
+            className={`border rounded-lg p-3 bg-white ${
+              diameterError ? "border-red-500" : "border-gray-300"
+            }`}
           />
           {diameterError ? (
             <Text className="text-red-500 mt-1 mb-4">{diameterError}</Text>
@@ -408,7 +427,7 @@ export default function StageUpload() {
       <TouchableOpacity
         onPress={handlePredict}
         disabled={loading}
-        className={`py-4 rounded-xl mb-6 ${loading ? "bg-green-400" : "bg-green-600"}`}
+        className={`py-4 rounded-xl mb-6 mt-4 ${loading ? "bg-green-400" : "bg-green-600"}`}
       >
         <Text className="text-white text-center font-semibold text-lg">
           {loading ? "Predicting..." : "Predict"}
