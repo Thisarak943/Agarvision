@@ -1,22 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { API_BASE } from "./config";
 import { clearToken, getToken, saveToken } from "./tokenStorage";
 
 /**
  * IMPORTANT:
  * - Android Emulator:  http://10.0.2.2:5000/api
  * - iOS Simulator:     http://localhost:5000/api
-<<<<<<< HEAD
- * - REAL phone (Expo Go): http://192.168.8.104:5000/api  
+ * - REAL phone (Expo Go): Uses dynamic IP from config.ts
+ * - Web browser: Uses localhost (configured in config.ts)
  */
-const BASE_URL = "http://172.28.15.232:5000/api";
- // ✅ keep your value
-=======
- * - REAL phone (Expo Go): http://10.92.16.110:5000/api
- */
-const BASE_URL = "http://10.92.16.110:5000/api";
-// ✅ Updated to match current Wi-Fi IP
->>>>>>> origin/oshini
+const BASE_URL = API_BASE;
 
 const USER_KEY = "USER_DATA";
 
