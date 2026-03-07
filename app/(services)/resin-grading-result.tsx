@@ -36,8 +36,8 @@ export default function ResinGradingResult() {
   const market = "N/A";
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Header title="Chips & Resin Grading" />
+    <SafeAreaView className="flex-1 bg-emerald-50">
+      <Header title="Resin & Chips Grading" />
 
       <View className="flex-1 px-6 py-4">
         <View className="bg-white rounded-2xl border border-gray-200 p-5">
@@ -84,9 +84,11 @@ export default function ResinGradingResult() {
             </Text>
           ) : null}
 
-          <Text className="text-gray-900 font-semibold text-center mt-6 mb-4">
-            Check whether the resin is Export{"\n"}Ready ?
-          </Text>
+          <View className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4 mt-6 mb-4">
+           <Text className="text-gray-900 font-semibold text-center text-lg leading-6">
+               Check whether the resin is Export Ready ?
+           </Text>
+          </View>
 
           <TouchableOpacity
             onPress={() => router.push("/(services)/export-readiness-form")}

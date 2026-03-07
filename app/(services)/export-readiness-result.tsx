@@ -17,7 +17,7 @@ export default function ExportReadinessResult() {
   const tip = parsed.improvement_tip ?? "-";
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-emerald-50">
       <Header title="Export Readiness" />
 
       <View className="flex-1 px-6 py-4">

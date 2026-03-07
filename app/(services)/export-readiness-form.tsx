@@ -24,22 +24,112 @@ export default function ExportReadinessForm() {
 
   const clearAll = () => {
     setChipWeight("");
-    setDryingMethod("Sun");
+    setDryingMethod("");
     setDryingTime("");
-    setStorageType("Open");
+    setStorageType("");
     setStorageDuration("");
-    setContamination("Low");
+    setContamination("");
+  };
+
+  const validateForm = () => {
+    const allowedDryingMethods = ["sun", "shade", "oven"];
+    const allowedStorageTypes = ["open", "closed", "sealed"];
+    const allowedContaminationLevels = ["low", "medium", "high"];
+
+    if (!chipWeight.trim()) {
+      Alert.alert("Validation Error", "Chip sample weight is required.");
+      return false;
+    }
+
+    if (isNaN(Number(chipWeight))) {
+      Alert.alert("Validation Error", "Chip sample weight must be a valid number.");
+      return false;
+    }
+
+    if (Number(chipWeight) <= 0) {
+      Alert.alert("Validation Error", "Chip sample weight must be greater than 0.");
+      return false;
+    }
+
+    if (!dryingMethod.trim()) {
+      Alert.alert("Validation Error", "Drying method is required.");
+      return false;
+    }
+
+    if (!allowedDryingMethods.includes(dryingMethod.trim().toLowerCase())) {
+      Alert.alert("Validation Error", "Drying method must be Sun, Shade, or Oven.");
+      return false;
+    }
+
+    if (!dryingTime.trim()) {
+      Alert.alert("Validation Error", "Drying time is required.");
+      return false;
+    }
+
+    if (isNaN(Number(dryingTime))) {
+      Alert.alert("Validation Error", "Drying time must be a valid number.");
+      return false;
+    }
+
+    if (Number(dryingTime) <= 0) {
+      Alert.alert("Validation Error", "Drying time must be greater than 0.");
+      return false;
+    }
+
+    if (!storageType.trim()) {
+      Alert.alert("Validation Error", "Storage type is required.");
+      return false;
+    }
+
+    if (!allowedStorageTypes.includes(storageType.trim().toLowerCase())) {
+      Alert.alert("Validation Error", "Storage type must be Open, Closed, or Sealed.");
+      return false;
+    }
+
+    if (!storageDuration.trim()) {
+      Alert.alert("Validation Error", "Storage duration is required.");
+      return false;
+    }
+
+    if (isNaN(Number(storageDuration))) {
+      Alert.alert("Validation Error", "Storage duration must be a valid number.");
+      return false;
+    }
+
+    if (Number(storageDuration) < 0) {
+      Alert.alert("Validation Error", "Storage duration cannot be negative.");
+      return false;
+    }
+
+    if (!contamination.trim()) {
+      Alert.alert("Validation Error", "Contamination level is required.");
+      return false;
+    }
+
+    if (
+      !allowedContaminationLevels.includes(contamination.trim().toLowerCase())
+    ) {
+      Alert.alert(
+        "Validation Error",
+        "Contamination level must be Low, Medium, or High."
+      );
+      return false;
+    }
+
+    return true;
   };
 
   const onCheck = async () => {
+    if (!validateForm()) return;
+
     try {
       const payload = {
         Chip_Sample_Weight_g: Number(chipWeight),
         Drying_Time_Days: Number(dryingTime),
-        Drying_Method: dryingMethod,
-        Storage_Type: storageType,
+        Drying_Method: dryingMethod.trim(),
+        Storage_Type: storageType.trim(),
         Storage_Duration_Weeks: Number(storageDuration),
-        Contamination_Level: contamination,
+        Contamination_Level: contamination.trim(),
       };
 
       const result = await checkExportReadiness(payload);
@@ -54,7 +144,7 @@ export default function ExportReadinessForm() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-emerald-50">
       <Header title="Export Readiness" />
 
       <ScrollView

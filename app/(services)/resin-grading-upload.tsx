@@ -53,8 +53,8 @@ export default function ResinGradingUpload() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <Header title="Chips & Resin Grading" />
+    <SafeAreaView className="flex-1 bg-emerald-50">
+      <Header title="Resin & Chips Grading" />
 
       <View className="flex-1 px-6 py-4">
         <View className="bg-white rounded-2xl border border-gray-200 p-5 flex-1">
