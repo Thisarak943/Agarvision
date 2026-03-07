@@ -12,13 +12,13 @@ export async function predictDisease(imageUri: string) {
   } as any);
 
   try {
-    const res = await axios.post(`${DISEASE_BASE}/disease/predict`, formData, {
-      timeout: 30000, // ✅ more time
+    // Changed from /disease/predict to /thisara/predict
+    const res = await axios.post(`${DISEASE_BASE}/thisara/predict`, formData, {
+      timeout: 120000,
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   } catch (err: any) {
-    // helpful debug
     const msg =
       err?.response?.data?.detail ||
       err?.response?.data?.error ||
@@ -38,7 +38,7 @@ export async function getDiseaseHistory() {
     },
   });
 
-  return res.data; // { items: [...] }
+  return res.data;
 }
 
 export async function deleteDiseaseHistory(id: string) {

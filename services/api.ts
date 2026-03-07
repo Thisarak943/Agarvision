@@ -65,7 +65,7 @@ export const authAPI = {
 };
 
 /* =========================
-   USER API (MISSING → FIXED)
+   USER API
 ========================= */
 export const userAPI = {
   async getProfile() {
@@ -76,7 +76,7 @@ export const userAPI = {
 };
 
 /* =========================
-   AUTH HELPERS (MISSING → FIXED)
+   AUTH HELPERS
 ========================= */
 export async function isAuthenticated() {
   const token = await getToken();
