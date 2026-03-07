@@ -4,7 +4,7 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-rean
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn, // only warnings and errors
-  strict: false, // disables "Reading from `value`" logs
+  strict: false, // disables "Reading from `value`" logsss
 });
 
 export default function Index() {

@@ -22,6 +22,7 @@ export default function ServicesLayout() {
       <Stack.Screen name="stage-upload" />
       <Stack.Screen name="stage-result" />
 
+      
     </Stack>
   );
 }
