@@ -4,6 +4,14 @@ export default function ServicesLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="resin-grading" />
+
+      {/* Your new pages */}
+      <Stack.Screen name="resin-grading-upload" />
+      <Stack.Screen name="resin-grading-result" />
+      <Stack.Screen name="export-readiness-form" />
+      <Stack.Screen name="export-readiness-result" />
+
+      {/* Existing pages */}
       <Stack.Screen name="disease-detection" />
       <Stack.Screen name="disease-upload" />
       <Stack.Screen name="disease-result" />

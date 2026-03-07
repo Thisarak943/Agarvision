@@ -12,3 +12,6 @@ export const DISEASE_BASE = `http://${PC_IP}:8000`;
 
 // Stage model
 export const STAGE_BASE = `${FASTAPI_BASE}/thenuka/stage`;
+
+// FastAPI ML server (Resin grading / Export readiness prediction) 
+export const RESIN_BASE = `http://${PC_IP}:8000`;

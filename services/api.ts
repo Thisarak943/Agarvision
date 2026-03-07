@@ -6,7 +6,7 @@ import { getToken, saveToken, clearToken } from "./tokenStorage";
  * IMPORTANT:
  * - Android Emulator:  http://10.0.2.2:5000/api
  * - iOS Simulator:     http://localhost:5000/api
- * - REAL phone (Expo Go): http://192.168.8.104:5000/api
+ * - REAL phone (Expo Go): http://192.168.8.104:5000/api  
  */
 const BASE_URL = "http://172.28.15.232:5000/api";
  // ✅ keep your value
