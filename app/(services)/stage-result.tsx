@@ -51,11 +51,21 @@ export default function StageResult() {
   const bullets = buildExplanation(stage);
 
   return (
-    <View className="flex-1 bg-[#E6F2ED] p-5 justify-between">
+    <View className="flex-1 bg-[#E6F2ED] px-5 pt-4 justify-between">
+
+      {/* Page Topic */}
+      <View className="mt-2 mb-3">
+        <Text className="text-center text-xl font-semibold">
+          Resin Induction Stage Result
+        </Text>
+      </View>
+
       <ScrollView showsVerticalScrollIndicator={false}>
+
         {imageUri ? (
-          <View className="bg-white rounded-2xl p-4 mt-6 shadow-md">
+          <View className="bg-white rounded-2xl p-4 mt-4 shadow-md">
             <Text className="text-lg font-semibold mb-3">Uploaded Image</Text>
+
             <Image
               source={{ uri: imageUri }}
               className="w-full h-56 rounded-xl"
@@ -65,7 +75,10 @@ export default function StageResult() {
         ) : null}
 
         <View className="bg-white rounded-2xl p-6 mt-6 shadow-md">
-          <Text className="text-lg font-bold text-center mb-4">Predicted Stage</Text>
+
+          <Text className="text-lg font-bold text-center mb-4">
+            Predicted Stage
+          </Text>
 
           <Text className="text-center mb-2">
             <Text className="font-semibold">Stage : </Text>
@@ -80,6 +93,7 @@ export default function StageResult() {
           <View className="border-b border-gray-200 mb-4" />
 
           <Text className="font-semibold mb-2">Explanation :</Text>
+
           {bullets.map((b, idx) => (
             <Text key={idx} className="text-gray-700 mb-1">
               • {b}
@@ -89,7 +103,11 @@ export default function StageResult() {
           {probabilities ? (
             <>
               <View className="border-b border-gray-200 my-4" />
-              <Text className="font-semibold mb-2">Probabilities :</Text>
+
+              <Text className="font-semibold mb-2">
+                Probabilities :
+              </Text>
+
               {Object.entries(probabilities).map(([k, v]) => (
                 <Text key={k} className="text-gray-700 mb-1">
                   • {k}: {(Number(v) * 100).toFixed(2)}%
@@ -97,10 +115,13 @@ export default function StageResult() {
               ))}
             </>
           ) : null}
+
         </View>
+
       </ScrollView>
 
-      <View className="mb-6">
+      <View className="mb-6 mt-4">
+
         <TouchableOpacity
           onPress={() => router.replace("/(services)/stage-upload")}
           className="border border-green-600 py-4 rounded-xl mb-3"
@@ -118,7 +139,9 @@ export default function StageResult() {
             Back to Home
           </Text>
         </TouchableOpacity>
+
       </View>
+
     </View>
   );
 }
