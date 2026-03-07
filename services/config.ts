@@ -1,5 +1,5 @@
 // services/config.ts
-export const PC_IP = "172.28.26.118";
+export const PC_IP = "172.28.15.232";
 
 // Express API (login/db)
 export const API_BASE = `http://${PC_IP}:5000/api`;
