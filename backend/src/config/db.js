@@ -6,7 +6,8 @@ async function connectDB(MONGO_URI) {
     console.log("✅ MongoDB connected");
   } catch (err) {
     console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1);
+    console.log("⚠️  Server will run WITHOUT database (for testing only)");
+    // process.exit(1); // Commented out to allow server to run
   }
 }
 
