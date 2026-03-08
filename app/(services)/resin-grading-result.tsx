@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import Header from "../../components/ui/Header";
 
 type BackendResult = {
@@ -32,8 +32,27 @@ export default function ResinGradingResult() {
       ? `${Math.round(result.confidence * 100)}%`
       : "N/A";
 
-  // You can change this later based on your own mapping logic
-  const market = "N/A";
+  // Market recommendation based on grade
+  const getRecommendedMarket = (gradeValue: string): string => {
+    const gradeUpper = gradeValue.toUpperCase();
+    
+    // Premium → Middle East Countries
+    if (gradeUpper === "PREMIUM") {
+      return "Middle East Countries";
+    } 
+    // Grade A → Europe
+    else if (gradeUpper.includes("GRADE A") || gradeUpper === "A") {
+      return "Europe";
+    } 
+    // Grade B → South Asia
+    else if (gradeUpper.includes("GRADE B") || gradeUpper === "B") {
+      return "South Asia";
+    }
+    
+    return "N/A";
+  };
+
+  const market = getRecommendedMarket(grade);
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-50">
