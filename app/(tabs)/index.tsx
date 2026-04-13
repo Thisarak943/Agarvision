@@ -1,10 +1,8 @@
 // app/(tabs)/index.tsx
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useUser } from '../../contexts/UserContext';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInUp,
@@ -13,8 +11,9 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '../../contexts/UserContext';
 
-import NotificationSlideView from '../views/NotificationSlideView';
 import SettingsSlideView from '../views/SettingsSlideView';
 
 import GlobalSearch from '../../components/GlobalSearch';
@@ -26,8 +25,8 @@ import SpecialServiceModal from '../../components/modals/SpecialServiceModal';
 
 // NEW: real article content
 import MarketPricesArticle from '../../components/articles/MarketPricesArticle';
-import TreeDiseasesArticle from '../../components/articles/TreeDiseasesArticle';
 import ResinQualityArticle from '../../components/articles/ResinQualityArticle';
+import TreeDiseasesArticle from '../../components/articles/TreeDiseasesArticle';
 
 // ----- Types -----
 interface SearchResult {
@@ -41,13 +40,7 @@ interface SearchResult {
   navigationParams?: any;
 }
 
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  read?: boolean;
-}
+
 
 type SectionKey = 'products' | 'services' | 'articles';
 
@@ -68,39 +61,7 @@ export default function Home() {
   const openSSModal = (service: string) => setActiveSSModal(service);
   const closeSSModal = () => setActiveSSModal(null);
 
-  const [showNotificationSlide, setShowNotificationSlide] = useState(false);
   const [showSettingsSlide, setShowSettingsSlide] = useState(false);
-
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: 'Prediction Completed',
-      message: 'Your agarwood scan result is ready. Tap to view the result.',
-      type: 'success',
-      read: false,
-    },
-    {
-      id: 2,
-      title: 'Grade Detected: Premium',
-      message: 'High resin density detected. Export-ready quality indicated.',
-      type: 'info',
-      read: false,
-    },
-    {
-      id: 3,
-      title: 'Export Readiness Warning',
-      message: 'Moisture seems high. Drying recommended before packaging.',
-      type: 'warning',
-      read: false,
-    },
-    {
-      id: 4,
-      title: 'Capture Tip',
-      message: 'Use natural light + plain background for best accuracy.',
-      type: 'info',
-      read: true,
-    },
-  ]);
 
   // Animations
   const headerOpacity = useSharedValue(0);
@@ -282,18 +243,9 @@ export default function Home() {
             </Text>
           </View>
 
-          <View className="flex-row">
-            <TouchableOpacity onPress={() => setShowNotificationSlide(true)} className="mr-4">
-              <Ionicons name="notifications" size={24} color="#10B981" />
-              {notifications.filter(n => !n.read).length > 0 && (
-                <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setShowSettingsSlide(true)}>
-              <Ionicons name="settings" size={24} color="#10B981" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => setShowSettingsSlide(true)}>
+            <Ionicons name="settings" size={24} color="#10B981" />
+          </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -400,20 +352,7 @@ export default function Home() {
         <View className="h-20" />
       </ScrollView>
 
-      {/* Notifications & Settings */}
-      <NotificationSlideView
-        visible={showNotificationSlide}
-        onClose={() => setShowNotificationSlide(false)}
-        notifications={notifications as any}
-        onNotificationRead={(id) =>
-          setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)))
-        }
-        onNotificationAction={(id, action) => {
-          if (action === 'view') Alert.alert('Action', `Viewing details for notification ${id}`);
-        }}
-        onClearAll={() => setNotifications([])}
-      />
-
+      {/* Settings */}
       <SettingsSlideView
         visible={showSettingsSlide}
         onClose={() => setShowSettingsSlide(false)}
