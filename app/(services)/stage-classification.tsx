@@ -1,12 +1,14 @@
-import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Layers } from "lucide-react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 
 export default function StageClassification() {
 
   const router = useRouter();
 
   return (
+    <PremiumServiceGuard serviceName="Stage Classification">
     <View className="flex-1 bg-[#E6F2ED] px-6 pt-6 justify-between">
 
       {/* Page Title */}
@@ -68,5 +70,6 @@ export default function StageClassification() {
       </View>
 
     </View>
+    </PremiumServiceGuard>
   );
 }

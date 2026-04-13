@@ -73,6 +73,12 @@ export const userAPI = {
     if (res.data?.user) await saveUserData(res.data.user);
     return res.data;
   },
+
+  async deleteAccount() {
+    const res = await api.post("/auth/delete-account");
+    await clearAuthData();
+    return res.data;
+  },
 };
 
 /* =========================

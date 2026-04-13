@@ -1,25 +1,25 @@
 // app/(auth)/login.tsx
-import React, { useState, useEffect } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Alert,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
-  withTiming,
+  useSharedValue,
   withDelay,
+  withTiming,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import { authAPI } from "../../services/api"; // ✅ ONLY ONCE
 
 export default function Login() {
@@ -114,13 +114,6 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    Alert.alert(
-      "Not Implemented",
-      "Google Sign-In needs backend + Google config. We can add it next."
-    );
-  };
-
   const handleForgotPassword = () => {
     Alert.alert(
       "Not Implemented",
@@ -179,14 +172,6 @@ export default function Login() {
                 onPress={handleLogin}
                 loading={loading}
                 className="mb-4"
-              />
-
-              <Button
-                title="Sign in with Google"
-                onPress={handleGoogleSignIn}
-                variant="outline"
-                className="mb-6"
-                disabled={loading}
               />
 
               <View className="flex-row justify-center">

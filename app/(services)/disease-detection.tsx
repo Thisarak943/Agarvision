@@ -1,11 +1,13 @@
 import { router } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 import Header from "../../components/ui/Header";
 
 export default function DiseaseDetection() {
   return (
-    <SafeAreaView className="flex-1 bg-green-100">
+    <PremiumServiceGuard serviceName="Disease Detection">
+      <SafeAreaView className="flex-1 bg-green-100">
       <Header title="Disease Detection" />
 
       {/* Scroll content */}
@@ -74,5 +76,6 @@ export default function DiseaseDetection() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </PremiumServiceGuard>
   );
 }

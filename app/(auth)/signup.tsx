@@ -1,24 +1,23 @@
 // app/(auth)/signup.tsx
-import React, { useState, useEffect } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Alert,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import { authAPI } from "../../services/api"; // ✅ backend
 
 export default function SignUp() {
@@ -165,7 +164,7 @@ export default function SignUp() {
         firstname: formData.firstName.trim(),
         lastname: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
-        phone: `+1${formData.mobile.trim()}`,
+        phone: formData.mobile.trim(),
         address: formData.shippingAddress.trim(),
         password: formData.password.trim(),
       };
@@ -247,28 +246,17 @@ export default function SignUp() {
                   autoCapitalize="none"
                 />
 
-                <View>
-                  <Text className="text-sm font-medium text-gray-700 mb-1">
-                    Mobile
-                  </Text>
-                  <View className="flex-row items-center">
-                    <View className="bg-gray-100 px-3 py-3 rounded-lg mr-2">
-                      <Text className="text-gray-700 font-medium">+1</Text>
-                    </View>
-                    <View className="flex-1">
-                      <Input
-                        placeholder="Enter your mobile number"
-                        value={formData.mobile}
-                        onChangeText={(text) => {
-                          const cleaned = text.replace(/[^0-9]/g, "").slice(0, 10);
-                          updateFormData("mobile", cleaned);
-                        }}
-                        keyboardType="phone-pad"
-                        maxLength={10}
-                      />
-                    </View>
-                  </View>
-                </View>
+                <Input
+                  label="Mobile"
+                  placeholder="Enter your mobile number (10 digits)"
+                  value={formData.mobile}
+                  onChangeText={(text) => {
+                    const cleaned = text.replace(/[^0-9]/g, "").slice(0, 10);
+                    updateFormData("mobile", cleaned);
+                  }}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                />
 
                 <Input
                   label="Shipping Address"

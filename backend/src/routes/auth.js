@@ -42,7 +42,9 @@ router.post("/register", async (req, res) => {
       phone,
       address,
       passwordHash,
-      isEmailVerified: true
+      isEmailVerified: true,
+      // NO auto-trial - user must choose plan on first use
+      // trialStartDate and subscription fields will be set during checkout
     });
 
     // You can auto-login after register (token), OR force login screen.

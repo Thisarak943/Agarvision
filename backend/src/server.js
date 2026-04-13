@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/auth");
 const diseaseHistoryRoutes = require("./routes/diseaseHistory");
+const subscriptionRoutes = require("./routes/subscription");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get("/", (req, res) => res.send("AgarVision API running ✅"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/disease-history", diseaseHistoryRoutes);
+app.use("/api/subscription", subscriptionRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,24 +1,24 @@
 // components/SettingsSlideView.tsx  ✅ AgarVision version (no Orders/Shipping/Payment stuff)
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
+  Alert,
+  Dimensions,
+  Modal,
+  ScrollView,
+  Switch,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Modal,
-  Dimensions,
-  Switch,
-  Alert,
+  View
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  FadeInDown,
   FadeIn,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
