@@ -1,10 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Text, TouchableOpacity, View, Alert } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/ui/Header";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function DiseaseUpload() {
   const [image, setImage] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export default function DiseaseUpload() {
         {/* MAIN CARD */}
         <View className="bg-white rounded-2xl border-2 border-green-200 p-6">
           <Text className="text-xl font-extrabold text-center mb-4 text-gray-900">
-            Upload Leaf Image
+            📸 Upload Leaf Image
           </Text>
 
           {/* UPLOAD AREA */}
@@ -55,7 +55,7 @@ export default function DiseaseUpload() {
               </View>
             ) : (
               <View className="w-20 h-20 rounded-2xl bg-white border-2 border-green-200 items-center justify-center">
-                <Ionicons name="camera-outline" size={38} color="#16a34a" />
+                <Text className="text-4xl">📷</Text>
               </View>
             )}
 
@@ -63,7 +63,7 @@ export default function DiseaseUpload() {
               onPress={pickImage}
               className="bg-primary rounded-xl px-8 py-3 mt-5 border border-green-700/20"
             >
-              <Text className="text-white font-semibold">Select</Text>
+              <Text className="text-white font-semibold">📁 Select Image</Text>
             </TouchableOpacity>
 
             <Text className="text-gray-500 text-xs mt-3 text-center">
@@ -85,40 +85,40 @@ export default function DiseaseUpload() {
             image ? "bg-primary" : "bg-gray-300"
           }`}
         >
-          <Text className="text-white text-center font-semibold">Continue</Text>
+          <Text className="text-white text-center font-semibold">🚀 Continue</Text>
         </TouchableOpacity>
 
         {/* TIPS SECTION */}
         <View className="mt-6 bg-white rounded-2xl border border-green-200 p-5">
           <Text className="font-semibold text-gray-800 mb-3">
-            Tips for Best Results
+            ✨ Tips for Best Results
           </Text>
 
           <View className="space-y-3">
             <View className="flex-row items-center">
-              <Ionicons name="sunny-outline" size={18} color="#16a34a" />
-              <Text className="ml-3 text-gray-600 text-sm">
+              <Text className="text-lg mr-2">☀️</Text>
+              <Text className="ml-1 text-gray-600 text-sm">
                 Take photos in good natural lighting
               </Text>
             </View>
 
             <View className="flex-row items-center">
-              <Ionicons name="scan-outline" size={18} color="#16a34a" />
-              <Text className="ml-3 text-gray-600 text-sm">
+              <Text className="text-lg mr-2">🎯</Text>
+              <Text className="ml-1 text-gray-600 text-sm">
                 Keep the leaf fully visible and in focus
               </Text>
             </View>
 
             <View className="flex-row items-center">
-              <Ionicons name="image-outline" size={18} color="#16a34a" />
-              <Text className="ml-3 text-gray-600 text-sm">
+              <Text className="text-lg mr-2">📸</Text>
+              <Text className="ml-1 text-gray-600 text-sm">
                 Avoid blurry or low-resolution images
               </Text>
             </View>
 
             <View className="flex-row items-center">
-              <Ionicons name="leaf-outline" size={18} color="#16a34a" />
-              <Text className="ml-3 text-gray-600 text-sm">
+              <Text className="text-lg mr-2">🍃</Text>
+              <Text className="ml-1 text-gray-600 text-sm">
                 Capture only agarwood leaves (no background clutter)
               </Text>
             </View>

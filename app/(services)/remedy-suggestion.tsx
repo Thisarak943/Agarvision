@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/ui/Header";
-import { Ionicons } from "@expo/vector-icons";
 
 export default function RemedySuggestion() {
   const { data } = useLocalSearchParams<{ data?: string }>();
@@ -54,12 +53,8 @@ export default function RemedySuggestion() {
             {/* 🔴 HIGHLIGHTED DISEASE BOX */}
             <View className="bg-red-50 border-2 border-red-300 rounded-xl p-4 mb-5">
               <View className="flex-row items-center">
-                <Ionicons
-                  name="alert-circle-outline"
-                  size={22}
-                  color="#dc2626"
-                />
-                <Text className="ml-2 text-red-800 font-bold">
+                <Text className="text-2xl mr-2">🦠</Text>
+                <Text className="ml-1 text-red-800 font-bold">
                   Detected Disease
                 </Text>
               </View>
@@ -71,14 +66,14 @@ export default function RemedySuggestion() {
 
             {/* TITLE */}
             <Text className="text-lg font-bold text-center mb-4">
-              Remedy Suggestions
+              🧴 Remedy Suggestions
             </Text>
 
             <View className="h-[1px] bg-green-500/30 mb-4" />
 
             {/* INSTRUCTIONS */}
             <Text className="font-semibold text-gray-800 mb-2">
-              Recommended Actions
+              💡 Recommended Actions
             </Text>
 
             {remedies.length ? (
@@ -112,12 +107,8 @@ export default function RemedySuggestion() {
             {/* 🔴 IMPORTANT NOTICE */}
             <View className="mt-5 bg-red-50 border-2 border-red-200 rounded-xl p-4">
               <View className="flex-row items-start">
-                <Ionicons
-                  name="warning-outline"
-                  size={20}
-                  color="#dc2626"
-                />
-                <View className="ml-3 flex-1">
+                <Text className="text-lg mr-2">⚠️</Text>
+                <View className="ml-1 flex-1">
                   <Text className="text-red-700 font-bold mb-1">
                     Important Notice
                   </Text>
@@ -140,7 +131,7 @@ export default function RemedySuggestion() {
             className="border-2 border-green-200 rounded-xl py-4 mt-6"
           >
             <Text className="text-center font-semibold">
-              Test Another Image
+              📸 Test Another Image
             </Text>
           </TouchableOpacity>
 
@@ -149,7 +140,7 @@ export default function RemedySuggestion() {
             className="bg-primary rounded-xl py-4 mt-4"
           >
             <Text className="text-white text-center font-semibold">
-              Back to Home
+              🏠 Back to Home
             </Text>
           </TouchableOpacity>
         </View>

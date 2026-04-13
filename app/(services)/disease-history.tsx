@@ -1,9 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../components/ui/Header";
 import { deleteDiseaseHistory, getDiseaseHistory } from "../../services/diseaseHistoryApi";
+
+/* Disease emoji mapping */
+const DISEASE_EMOJIS: Record<string, string> = {
+  healthy: "✅",
+  "leaf spot": "🦠",
+  powdery_mildew: "💨",
+  rust: "🌰",
+  anthracnose: "🎯",
+};
 
 export default function DiseaseHistory() {
   const [loading, setLoading] = useState(true);
@@ -27,8 +37,8 @@ export default function DiseaseHistory() {
     try {
       await deleteDiseaseHistory(id);
       setItems((prev) => prev.filter((x) => x._id !== id));
-    } catch {
-      // ignore
+    } catch (e: any) {
+      setError(e?.message || "Failed to delete prediction");
     }
   };
 
@@ -36,13 +46,15 @@ export default function DiseaseHistory() {
     load();
   }, []);
 
+  const isAuthError = error?.includes("login") || error?.includes("token") || error?.includes("Session expired");
+
   return (
     <SafeAreaView className="flex-1 bg-green-100">
       <Header title="Disease Detection" />
 
       <ScrollView className="flex-1 px-6 py-6" showsVerticalScrollIndicator={false}>
         <View className="bg-white rounded-2xl border-2 border-green-200 p-5">
-          <Text className="text-lg font-extrabold text-gray-900">Prediction History</Text>
+          <Text className="text-lg font-extrabold text-gray-900">📋 Prediction History</Text>
           <Text className="text-gray-600 mt-1">
             Your recent disease predictions are saved here.
           </Text>
@@ -56,38 +68,59 @@ export default function DiseaseHistory() {
         )}
 
         {!loading && error && (
-          <View className="mt-4 bg-white rounded-2xl border border-red-200 p-5">
-            <Text className="text-red-700 font-semibold">Error</Text>
-            <Text className="text-gray-700 mt-1">{error}</Text>
-            <TouchableOpacity onPress={load} className="bg-primary rounded-xl py-3 mt-4">
-              <Text className="text-white text-center font-semibold">Retry</Text>
-            </TouchableOpacity>
+          <View className={`mt-4 ${isAuthError ? "bg-blue-50 border-blue-200" : "bg-red-50 border-red-200"} rounded-2xl border p-5`}>
+            <Text className={`${isAuthError ? "text-blue-700" : "text-red-700"} font-semibold`}>
+              {isAuthError ? "🔐 Authentication Required" : "❌ Error"}
+            </Text>
+            <Text className={`${isAuthError ? "text-blue-600" : "text-gray-700"} mt-2`}>{error}</Text>
+            
+            {isAuthError ? (
+              <TouchableOpacity 
+                onPress={() => router.replace("/(auth)/login")}
+                className="bg-blue-500 rounded-xl py-3 mt-4"
+              >
+                <Text className="text-white text-center font-semibold">🔑 Go to Login</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                onPress={load} 
+                className="bg-primary rounded-xl py-3 mt-4"
+              >
+                <Text className="text-white text-center font-semibold">🔄 Retry</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
         {!loading && !error && items.length === 0 && (
           <View className="mt-4 bg-white rounded-2xl border border-gray-200 p-5">
             <Text className="text-gray-700">
-              No history yet. Run a prediction and it will appear here.
+              📝 No history yet. Run a prediction and it will appear here.
             </Text>
           </View>
         )}
 
         {!loading && !error && items.map((it) => {
           const pct = Math.round((Number(it.confidence || 0)) * 100);
+          const diseaseKey = (it.predicted_disease || "").toLowerCase();
+          const emoji = DISEASE_EMOJIS[diseaseKey] || "🔍";
+          const isHealthy = diseaseKey === "healthy";
+
           return (
             <View
               key={it._id}
-              className="mt-4 bg-white rounded-2xl border border-gray-200 p-5"
+              className={`mt-4 rounded-2xl border p-5 ${isHealthy ? "bg-green-50 border-green-200" : "bg-white border-gray-200"}`}
             >
               <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <View className="w-10 h-10 rounded-xl bg-green-50 border border-green-200 items-center justify-center">
-                    <Ionicons name="leaf-outline" size={18} color="#16a34a" />
-                  </View>
-                  <View className="ml-3">
-                    <Text className="font-semibold text-gray-900">{it.predicted_disease}</Text>
-                    <Text className="text-xs text-gray-500">Confidence: {pct}%</Text>
+                <View className="flex-row items-center flex-1">
+                  <Text className="text-3xl mr-3">{emoji}</Text>
+                  <View className="flex-1">
+                    <Text className={`font-semibold ${isHealthy ? "text-green-700" : "text-gray-900"}`}>
+                      {it.predicted_disease}
+                    </Text>
+                    <Text className="text-xs text-gray-500">
+                      {pct >= 80 ? "🎯 High" : pct >= 60 ? "📊 Medium" : "⚠️ Low"} Confidence • {pct}%
+                    </Text>
                   </View>
                 </View>
 
@@ -98,10 +131,10 @@ export default function DiseaseHistory() {
 
               <View className="h-[1px] bg-gray-200 my-4" />
 
-              <Text className="text-sm font-semibold text-gray-800 mb-2">Top Remedies</Text>
+              <Text className="text-sm font-semibold text-gray-800 mb-2">💡 Top Remedies</Text>
               {Array.isArray(it.remedies) && it.remedies.length > 0 ? (
                 it.remedies.slice(0, 3).map((r: string, idx: number) => (
-                  <Text key={idx} className="text-gray-700 mt-1">• {r}</Text>
+                  <Text key={idx} className="text-gray-700 mt-1">✓ {r}</Text>
                 ))
               ) : (
                 <Text className="text-gray-500">No remedies available.</Text>
