@@ -1,52 +1,100 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-    resetChatConversation,
-    sendChatMessage,
+  checkMarketHealth,
+  checkMarketLlmHealth,
+  resetChatConversation,
+  sendChatMessage,
+  type MarketChatPrediction,
 } from "../../../services/MarketintelligenceApi";
+
+const SESSION_KEY = "OSHINI_MARKET_CHATBOT_SESSION_ID";
 
 type Msg = {
   id: string;
   role: "bot" | "user";
   text: string;
+  status?: string;
   intent?: string;
-  confidence?: number;
+  prediction?: MarketChatPrediction | null;
 };
 
-const TopBar = ({ title, onClose }: { title: string; onClose: () => void }) => (
+const QUICK_PROMPTS = [
+  "Hello",
+  "What you can do in here?",
+  "What is the demand for Silani Ravana Premium oil in UAE for December Week 4 on festival season?",
+  "Current oil prices",
+  "Agarwood oil details",
+];
+
+function createSessionId() {
+  return `mobile_user_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function getStableSessionId() {
+  const existing = await AsyncStorage.getItem(SESSION_KEY);
+  if (existing) return existing;
+
+  const next = createSessionId();
+  await AsyncStorage.setItem(SESSION_KEY, next);
+  return next;
+}
+
+const TopBar = ({
+  backendOnline,
+  resetting,
+  onReset,
+}: {
+  backendOnline: boolean | null;
+  resetting: boolean;
+  onReset: () => void;
+}) => (
   <View style={styles.topBar}>
-    <TouchableOpacity onPress={() => router.back()} style={{ padding: 4 }}>
+    <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
       <Ionicons name="arrow-back" size={22} color="#111827" />
     </TouchableOpacity>
 
-    <View style={styles.topBarCenter}>
-      <View style={styles.botAvatarSmall}>
-        <Ionicons name="analytics" size={14} color="#10B981" />
-      </View>
-      <View>
-        <Text style={styles.topBarTitle}>{title}</Text>
-        <View style={styles.onlineRow}>
-          <View style={styles.onlineDot} />
-          <Text style={styles.onlineText}>AI Assistant · Online</Text>
-        </View>
+    <View style={styles.headerTextWrap}>
+      <Text style={styles.topBarTitle}>Agarwood Market Assistant</Text>
+      <View style={styles.subtitleRow}>
+        <View
+          style={[
+            styles.onlineDot,
+            backendOnline === false && styles.offlineDot,
+            backendOnline === null && styles.checkingDot,
+          ]}
+        />
+        <Text style={styles.subtitleText}>
+          Ask about demand, prices, oil types, and export markets
+        </Text>
       </View>
     </View>
 
-    <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-      <Ionicons name="close" size={18} color="white" />
+    <TouchableOpacity
+      onPress={onReset}
+      style={[styles.resetBtn, resetting && styles.resetBtnDisabled]}
+      disabled={resetting}
+      activeOpacity={0.8}
+    >
+      {resetting ? (
+        <ActivityIndicator size="small" color="#10B981" />
+      ) : (
+        <Ionicons name="refresh" size={18} color="#10B981" />
+      )}
     </TouchableOpacity>
   </View>
 );
@@ -59,179 +107,284 @@ function BotAvatar() {
   );
 }
 
+function UserAvatar() {
+  return (
+    <View style={styles.userAvatar}>
+      <Ionicons name="person" size={14} color="#10B981" />
+    </View>
+  );
+}
+
+function formatLkr(value?: number) {
+  if (typeof value !== "number" || Number.isNaN(value)) return "-";
+  return `LKR ${value.toLocaleString()}`;
+}
+
+function getBotDisplayText(
+  reply: string | undefined,
+  prediction?: MarketChatPrediction | null
+) {
+  if (!prediction) {
+    return (
+      reply ||
+      "I can help with agarwood oil demand, prices, oil types, and export markets."
+    );
+  }
+
+  const price = prediction.recommended_price_range;
+  const priceText = price
+    ? `For pricing, I would keep it around ${formatLkr(
+        price.min_price_lkr
+      )} to ${formatLkr(price.max_price_lkr)}.`
+    : "";
+  const currentPriceText =
+    typeof price?.current_selling_price_lkr === "number"
+      ? ` The current selling price is about ${formatLkr(
+          price.current_selling_price_lkr
+        )}.`
+      : "";
+  const reasons = prediction.reasons?.slice(0, 2).join(" Also, ");
+  const reasonText = reasons ? ` ${reasons}` : "";
+  const backendReply = reply ? `${reply.trim()} ` : "";
+
+  return `${backendReply}For ${prediction.oil_name} ${prediction.oil_grade} oil in ${prediction.export_country}, the demand looks ${prediction.demand_category.toLowerCase()} for ${prediction.export_date}. The demand index is ${prediction.demand_index}.${reasonText} ${priceText}${currentPriceText}`.trim();
+}
+
 function TypingIndicator() {
   return (
-    <View style={styles.typingWrap}>
+    <View style={styles.msgRowBot}>
       <BotAvatar />
       <View style={styles.typingBubble}>
-        <View style={styles.typingDots}>
-          {[0.4, 0.7, 1].map((op, i) => (
-            <View key={i} style={[styles.typingDot, { opacity: op }]} />
-          ))}
-        </View>
+        <ActivityIndicator size="small" color="white" />
+        <Text style={styles.typingText}>Thinking...</Text>
       </View>
     </View>
   );
 }
 
-// Quick prompts the user can tap to pre-fill the input
-const QUICK_PROMPTS = [
-  "Predict demand for Cobra in UAE next month",
-  "Recommend price for Ravana",
-  "What can you do?",
-  "Tell me about the oil types",
-];
-
 export default function MarketPriceChat() {
+  const [sessionId, setSessionId] = useState("");
   const [messages, setMessages] = useState<Msg[]>([
     {
       id: "welcome",
       role: "bot",
-      text: "Hello! I'm your Agarwood Market Assistant 🌿\nAsk me about demand forecasts, price recommendations, or market trends.",
+      text: "Hello! I’m here to help with agarwood oil questions.",
     },
   ]);
   const [text, setText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [llmOnline, setLlmOnline] = useState<boolean | null>(null);
+  const [error, setError] = useState("");
   const listRef = useRef<FlatList>(null);
 
-  // Reset backend conversation state when component mounts
   useEffect(() => {
-    resetChatConversation();
+    let active = true;
+
+    async function init() {
+      const id = await getStableSessionId();
+      const [online, llmReady] = await Promise.all([
+        checkMarketHealth(),
+        checkMarketLlmHealth(),
+      ]);
+
+      if (!active) return;
+      setSessionId(id);
+      setBackendOnline(online);
+      setLlmOnline(llmReady);
+      if (!online) {
+        setError(
+          "Backend is unavailable. Please start the chatbot API and try again."
+        );
+      } else if (!llmReady) {
+        setError(
+          "Chatbot backend is running, but the LLM service is not configured."
+        );
+      }
+    }
+
+    init();
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  const scrollToEnd = () => {
+    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 80);
+  };
 
   const send = async (overrideText?: string) => {
     const trimmed = (overrideText ?? text).trim();
-    if (!trimmed) return;
+    if (!trimmed || isTyping) return;
+
+    const activeSessionId = sessionId || (await getStableSessionId());
+    if (!sessionId) setSessionId(activeSessionId);
 
     const userMsg: Msg = {
-      id: String(Date.now()),
+      id: `${Date.now()}-user`,
       role: "user",
       text: trimmed,
     };
+
     setMessages((prev) => [...prev, userMsg]);
     setText("");
     setIsTyping(true);
-
-    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
+    setError("");
+    scrollToEnd();
 
     try {
-      const res = await sendChatMessage(trimmed);
+      const res = await sendChatMessage(trimmed, activeSessionId);
 
       const botMsg: Msg = {
-        id: String(Date.now() + 1),
+        id: `${Date.now()}-bot`,
         role: "bot",
-        text: res.response,
+        text: getBotDisplayText(res.reply, res.prediction),
+        status: res.status,
         intent: res.intent,
-        confidence: res.confidence,
+        prediction: res.prediction,
       };
 
+      setBackendOnline(true);
+      setLlmOnline(true);
       setMessages((prev) => [...prev, botMsg]);
     } catch (err: any) {
-      const errorMsg: Msg = {
-        id: String(Date.now() + 2),
-        role: "bot",
-        text: "Sorry, I couldn't reach the server. Please check your connection and try again.",
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      setBackendOnline(false);
+      setLlmOnline(false);
+      const msg =
+        err?.message ||
+        "Could not reach the chatbot service. Please check the backend.";
+      setError(msg);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `${Date.now()}-error`,
+          role: "bot",
+          text: msg,
+          status: "error",
+        },
+      ]);
     } finally {
       setIsTyping(false);
-      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+      scrollToEnd();
     }
   };
 
-  const handleClose = async () => {
-    await resetChatConversation();
-    router.back();
+  const resetChat = async () => {
+    const activeSessionId = sessionId || (await getStableSessionId());
+    setResetting(true);
+    setError("");
+
+    try {
+      await resetChatConversation(activeSessionId);
+      setMessages([
+        {
+          id: "welcome-reset",
+          role: "bot",
+          text: "Chat reset. Ask me about agarwood oil demand, prices, oil details, or export markets.",
+        },
+      ]);
+      setBackendOnline(true);
+      setLlmOnline(true);
+    } catch (err: any) {
+      setError(err?.message || "Could not reset the chat session.");
+    } finally {
+      setResetting(false);
+    }
   };
 
   const renderItem = ({ item }: { item: Msg }) => {
     const isUser = item.role === "user";
+
     return (
-      <View
-        style={[styles.msgRow, isUser ? styles.msgRowUser : styles.msgRowBot]}
-      >
+      <View style={isUser ? styles.msgRowUser : styles.msgRowBot}>
         {!isUser && <BotAvatar />}
-        <View
-          style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}
-        >
-          <Text
+        <View style={styles.messageContent}>
+          <View
             style={[
-              styles.bubbleText,
-              isUser ? styles.bubbleTextUser : styles.bubbleTextBot,
+              styles.bubble,
+              isUser ? styles.bubbleUser : styles.bubbleBot,
+              item.status === "error" && styles.errorBubble,
             ]}
           >
-            {item.text}
-          </Text>
-          {__DEV__ && !isUser && item.intent && item.intent !== "greeting" && (
-            <View style={styles.intentBadge}>
-              <Text style={styles.intentBadgeText}>
-                {item.intent} · {Math.round((item.confidence ?? 0) * 100)}%
-              </Text>
-            </View>
-          )}
-        </View>
-        {isUser && (
-          <View style={styles.userAvatar}>
-            <Ionicons name="person" size={14} color="#10B981" />
+            <Text
+              style={[
+                styles.bubbleText,
+                isUser ? styles.bubbleTextUser : styles.bubbleTextBot,
+                item.status === "error" && styles.errorText,
+              ]}
+            >
+              {item.text}
+            </Text>
           </View>
-        )}
+        </View>
+        {isUser && <UserAvatar />}
       </View>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopBar title="Market Intelligence.." onClose={handleClose} />
+      <TopBar
+        backendOnline={backendOnline}
+        resetting={resetting}
+        onReset={resetChat}
+      />
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.keyboardWrap}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={0}
       >
+        {error || llmOnline === false ? (
+          <View style={styles.errorBanner}>
+            <Ionicons name="warning-outline" size={16} color="#B45309" />
+            <Text style={styles.errorBannerText}>
+              {error ||
+                "Chatbot backend is running, but the LLM service is not configured."}
+            </Text>
+          </View>
+        ) : null}
+
         <FlatList
           ref={listRef}
           data={messages}
-          keyExtractor={(i) => i.id}
+          keyExtractor={(item) => item.id}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
-          onContentSizeChange={() =>
-            listRef.current?.scrollToEnd({ animated: true })
-          }
+          onContentSizeChange={scrollToEnd}
           ListFooterComponent={isTyping ? <TypingIndicator /> : null}
         />
 
         <View style={styles.bottomSection}>
-          {/* Quick prompt chips */}
           <View style={styles.chipsRow}>
-            {QUICK_PROMPTS.map((q) => (
+            {QUICK_PROMPTS.map((prompt) => (
               <TouchableOpacity
-                key={q}
+                key={prompt}
                 style={styles.chip}
-                onPress={() => send(q)}
-                activeOpacity={0.7}
+                onPress={() => send(prompt)}
+                disabled={isTyping}
+                activeOpacity={0.75}
               >
-                <Text style={styles.chipText}>{q}</Text>
+                <Text style={styles.chipText} numberOfLines={1}>
+                  {prompt}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          {/* Input row */}
           <View style={styles.inputRow}>
-            <TouchableOpacity style={styles.micBtn}>
-              <Ionicons name="mic" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-
             <View style={styles.inputWrap}>
               <TextInput
                 value={text}
                 onChangeText={setText}
-                placeholder="Ask a question..."
+                placeholder="Type your market question..."
                 placeholderTextColor="#9CA3AF"
                 style={styles.textInput}
                 multiline
-                onSubmitEditing={() => send()}
                 returnKeyType="send"
+                onSubmitEditing={() => send()}
                 blurOnSubmit
               />
             </View>
@@ -242,8 +395,8 @@ export default function MarketPriceChat() {
                 styles.sendBtn,
                 (!text.trim() || isTyping) && styles.sendBtnDisabled,
               ]}
-              activeOpacity={0.85}
               disabled={!text.trim() || isTyping}
+              activeOpacity={0.85}
             >
               {isTyping ? (
                 <ActivityIndicator size="small" color="white" />
@@ -260,72 +413,79 @@ export default function MarketPriceChat() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0fdf4" },
-  listContent: {
-    padding: 16,
-    paddingBottom: 8,
-    ...(Platform.OS === "web"
-      ? {
-          maxWidth: 768,
-          alignSelf: "center",
-          width: "100%",
-        }
-      : {}),
-  },
-  bottomSection: {
-    ...(Platform.OS === "web"
-      ? {
-          maxWidth: 768,
-          alignSelf: "center",
-          width: "100%",
-        }
-      : {}),
-  },
+  keyboardWrap: { flex: 1 },
   topBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
+    gap: 10,
   },
-  topBarCenter: {
-    flex: 1,
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTextWrap: { flex: 1 },
+  topBarTitle: { fontSize: 16, fontWeight: "800", color: "#111827" },
+  subtitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginLeft: 8,
+    gap: 5,
+    marginTop: 3,
   },
-  botAvatarSmall: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  subtitleText: { flex: 1, fontSize: 11, color: "#6B7280", lineHeight: 15 },
+  onlineDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: "#10B981",
+  },
+  offlineDot: { backgroundColor: "#EF4444" },
+  checkingDot: { backgroundColor: "#F59E0B" },
+  resetBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "#ecfdf5",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#a7f3d0",
     alignItems: "center",
     justifyContent: "center",
   },
-  topBarTitle: { fontSize: 14, fontWeight: "700", color: "#111827" },
-  onlineRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  onlineDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#10B981",
+  resetBtnDisabled: { opacity: 0.7 },
+  listContent: {
+    paddingHorizontal: 14,
+    paddingTop: 16,
+    paddingBottom: 8,
+    ...(Platform.OS === "web"
+      ? {
+          maxWidth: 720,
+          width: "100%",
+          alignSelf: "center",
+        }
+      : {}),
   },
-  onlineText: { fontSize: 10, color: "#10B981", fontWeight: "500" },
-  closeBtn: {
-    backgroundColor: "#EF4444",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
+  msgRowBot: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+    gap: 8,
+    marginBottom: 14,
   },
-  msgRow: { flexDirection: "row", marginBottom: 12, gap: 8 },
-  msgRowBot: { alignItems: "flex-end", justifyContent: "flex-start" },
-  msgRowUser: { alignItems: "flex-end", justifyContent: "flex-end" },
+  msgRowUser: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+    gap: 8,
+    marginBottom: 14,
+  },
+  messageContent: { maxWidth: "82%" },
   botAvatar: {
     width: 30,
     height: 30,
@@ -339,104 +499,113 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#ecfdf5",
-    borderWidth: 1.5,
+    backgroundColor: "white",
+    borderWidth: 1,
     borderColor: "#a7f3d0",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
   bubble: {
-    maxWidth: "75%",
     borderRadius: 18,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  bubbleBot: { backgroundColor: "#10B981", borderBottomLeftRadius: 4 },
+  bubbleBot: {
+    backgroundColor: "#10B981",
+    borderBottomLeftRadius: 5,
+  },
   bubbleUser: {
     backgroundColor: "white",
-    borderBottomRightRadius: 4,
     borderWidth: 1,
     borderColor: "#d1fae5",
+    borderBottomRightRadius: 5,
+  },
+  errorBubble: {
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
+    borderColor: "#FCD34D",
   },
   bubbleText: { fontSize: 14, lineHeight: 21 },
   bubbleTextBot: { color: "white" },
   bubbleTextUser: { color: "#111827" },
-  intentBadge: {
-    marginTop: 6,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    alignSelf: "flex-start",
-  },
-  intentBadgeText: {
-    fontSize: 9,
-    color: "rgba(255,255,255,0.85)",
-    fontWeight: "600",
-  },
-  typingWrap: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
-    marginBottom: 12,
-  },
+  errorText: { color: "#92400E" },
   typingBubble: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     backgroundColor: "#10B981",
     borderRadius: 18,
-    borderBottomLeftRadius: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderBottomLeftRadius: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
-  typingDots: { flexDirection: "row", gap: 4, alignItems: "center" },
-  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "white" },
+  typingText: { color: "white", fontSize: 13, fontWeight: "600" },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#FFFBEB",
+    borderBottomWidth: 1,
+    borderBottomColor: "#FDE68A",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  errorBannerText: { flex: 1, color: "#92400E", fontSize: 12 },
+  bottomSection: {
+    backgroundColor: "#f0fdf4",
+    paddingTop: 8,
+    ...(Platform.OS === "web"
+      ? {
+          maxWidth: 720,
+          width: "100%",
+          alignSelf: "center",
+        }
+      : {}),
+  },
   chipsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
     paddingHorizontal: 12,
     paddingBottom: 8,
-    gap: 8,
-    flexWrap: "wrap",
   },
   chip: {
+    maxWidth: 180,
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: 18,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderWidth: 1,
     borderColor: "#d1fae5",
   },
-  chipText: { fontSize: 11, color: "#10B981", fontWeight: "500" },
+  chipText: { color: "#047857", fontSize: 11, fontWeight: "600" },
   inputRow: {
     flexDirection: "row",
     alignItems: "flex-end",
     paddingHorizontal: 12,
     paddingBottom: 16,
-    paddingTop: 8,
     gap: 8,
-    backgroundColor: "#f0fdf4",
-  },
-  micBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
   },
   inputWrap: {
     flex: 1,
+    minHeight: 44,
+    maxHeight: 110,
     backgroundColor: "white",
     borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    minHeight: 44,
+    borderColor: "#d1fae5",
+    paddingHorizontal: 15,
+    paddingVertical: 9,
     justifyContent: "center",
   },
-  textInput: { fontSize: 14, color: "#111827", maxHeight: 100 },
+  textInput: {
+    color: "#111827",
+    fontSize: 14,
+    lineHeight: 20,
+    maxHeight: 90,
+    padding: 0,
+  },
   sendBtn: {
     width: 44,
     height: 44,
@@ -446,7 +615,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     shadowColor: "#10B981",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
   },

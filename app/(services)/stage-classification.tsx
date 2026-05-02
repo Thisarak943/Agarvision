@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Layers } from "lucide-react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 
@@ -26,7 +26,7 @@ export default function StageClassification() {
 
         {/* Icon Container */}
         <View className="bg-green-100 p-5 rounded-2xl mb-5">
-          <Layers size={40} color="#16a34a" />
+          <MaterialCommunityIcons name="layers-outline" size={40} color="#16a34a" />
         </View>
 
         {/* Card Title */}
