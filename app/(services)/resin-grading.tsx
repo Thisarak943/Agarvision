@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
+//import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 import Header from "../../components/ui/Header";
 
 export default function ResinGrading() {
   const router = useRouter();
 
   return (
-    <PremiumServiceGuard serviceName="Resin & Chips Grading">
+    //<PremiumServiceGuard serviceName="Resin & Chips Grading">
     <SafeAreaView className="flex-1 bg-emerald-50">
       <Header title="Resin & Chips Grading" />
 
@@ -70,6 +70,6 @@ export default function ResinGrading() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-    </PremiumServiceGuard>
+    //</PremiumServiceGuard>
   );
 }
