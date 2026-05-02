@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { ArrowLeft, Layers } from "lucide-react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 //import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 
@@ -29,10 +29,15 @@ export default function StageClassification() {
         {/* Card */}
         <View className="bg-white rounded-3xl p-7 shadow-lg border border-green-200 items-center">
 
-          {/* Icon Container */}
-          <View className="bg-green-100 p-5 rounded-2xl mb-5 border border-green-200">
-            <Layers size={40} color="#16a34a" />
-          </View>
+        {/* Icon Container */}
+        <View className="bg-green-100 p-5 rounded-2xl mb-5">
+          <MaterialCommunityIcons name="layers-outline" size={40} color="#16a34a" />
+        </View>
+
+        {/* Card Title */}
+        <Text className="text-xl font-bold text-center text-gray-800 mb-3">
+          Resin Induction Stage Classifier
+        </Text>
 
           {/* Description */}
           <Text className="text-gray-600 text-center leading-6 mb-6">

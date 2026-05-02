@@ -34,7 +34,12 @@ export const predictResinGrading = async (imageUri: string) => {
   const text = await response.text();
 
   if (!response.ok) {
-    throw new Error(text);
+    try {
+      const errorData = JSON.parse(text);
+      throw new Error(errorData?.detail ?? errorData?.message ?? text);
+    } catch {
+      throw new Error(text || "Failed to analyze image");
+    }
   }
 
   return JSON.parse(text);

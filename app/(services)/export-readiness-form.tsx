@@ -12,111 +12,89 @@ import { useRouter } from "expo-router";
 import Header from "../../components/ui/Header";
 import { checkExportReadiness } from "../../services/exportReadinessApi";
 
+const DRYING_METHODS = [
+  { label: "Machine", value: "machine" },
+  { label: "Sun", value: "sun" },
+];
+
+const STORAGE_TYPES = [
+  { label: "Open", value: "open" },
+  { label: "Sealed", value: "sealed" },
+];
+
+const CONTAMINATION_LEVELS = [
+  { label: "None", value: "none" },
+  { label: "Low", value: "low" },
+  { label: "High", value: "high" },
+];
+
+type FormErrors = {
+  chipWeight?: string;
+  dryingMethod?: string;
+  dryingTime?: string;
+  storageType?: string;
+  storageDurationDays?: string;
+  contamination?: string;
+};
+
 export default function ExportReadinessForm() {
   const router = useRouter();
 
-  const [chipWeight, setChipWeight] = useState("02");
-  const [dryingMethod, setDryingMethod] = useState("Sun");
-  const [dryingTime, setDryingTime] = useState("12");
-  const [storageType, setStorageType] = useState("Open");
-  const [storageDuration, setStorageDuration] = useState("5");
-  const [contamination, setContamination] = useState("Low");
+  const [chipWeight, setChipWeight] = useState("");
+  const [dryingMethod, setDryingMethod] = useState("");
+  const [dryingTime, setDryingTime] = useState("");
+  const [storageType, setStorageType] = useState("");
+  const [storageDurationDays, setStorageDurationDays] = useState("");
+  const [contamination, setContamination] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const clearError = (field: keyof FormErrors) => {
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
 
   const clearAll = () => {
     setChipWeight("");
     setDryingMethod("");
     setDryingTime("");
     setStorageType("");
-    setStorageDuration("");
+    setStorageDurationDays("");
     setContamination("");
+    setErrors({});
   };
 
   const validateForm = () => {
-    const allowedDryingMethods = ["sun", "shade", "oven"];
-    const allowedStorageTypes = ["open", "closed", "sealed"];
-    const allowedContaminationLevels = ["low", "medium", "high"];
+    const nextErrors: FormErrors = {};
 
-    if (!chipWeight.trim()) {
-      Alert.alert("Validation Error", "Chip sample weight is required.");
-      return false;
+    if (!chipWeight.trim() || isNaN(Number(chipWeight)) || Number(chipWeight) <= 0) {
+      nextErrors.chipWeight = "Enter a valid chip sample weight greater than 0.";
     }
 
-    if (isNaN(Number(chipWeight))) {
-      Alert.alert("Validation Error", "Chip sample weight must be a valid number.");
-      return false;
-    }
-
-    if (Number(chipWeight) <= 0) {
-      Alert.alert("Validation Error", "Chip sample weight must be greater than 0.");
-      return false;
-    }
-
-    if (!dryingMethod.trim()) {
-      Alert.alert("Validation Error", "Drying method is required.");
-      return false;
-    }
-
-    if (!allowedDryingMethods.includes(dryingMethod.trim().toLowerCase())) {
-      Alert.alert("Validation Error", "Drying method must be Sun, Shade, or Oven.");
-      return false;
-    }
-
-    if (!dryingTime.trim()) {
-      Alert.alert("Validation Error", "Drying time is required.");
-      return false;
-    }
-
-    if (isNaN(Number(dryingTime))) {
-      Alert.alert("Validation Error", "Drying time must be a valid number.");
-      return false;
-    }
-
-    if (Number(dryingTime) <= 0) {
-      Alert.alert("Validation Error", "Drying time must be greater than 0.");
-      return false;
-    }
-
-    if (!storageType.trim()) {
-      Alert.alert("Validation Error", "Storage type is required.");
-      return false;
-    }
-
-    if (!allowedStorageTypes.includes(storageType.trim().toLowerCase())) {
-      Alert.alert("Validation Error", "Storage type must be Open, Closed, or Sealed.");
-      return false;
-    }
-
-    if (!storageDuration.trim()) {
-      Alert.alert("Validation Error", "Storage duration is required.");
-      return false;
-    }
-
-    if (isNaN(Number(storageDuration))) {
-      Alert.alert("Validation Error", "Storage duration must be a valid number.");
-      return false;
-    }
-
-    if (Number(storageDuration) < 0) {
-      Alert.alert("Validation Error", "Storage duration cannot be negative.");
-      return false;
-    }
-
-    if (!contamination.trim()) {
-      Alert.alert("Validation Error", "Contamination level is required.");
-      return false;
+    if (!dryingTime.trim() || isNaN(Number(dryingTime)) || Number(dryingTime) <= 0) {
+      nextErrors.dryingTime = "Enter a valid drying time greater than 0 days.";
     }
 
     if (
-      !allowedContaminationLevels.includes(contamination.trim().toLowerCase())
+      !storageDurationDays.trim() ||
+      isNaN(Number(storageDurationDays)) ||
+      Number(storageDurationDays) < 0
     ) {
-      Alert.alert(
-        "Validation Error",
-        "Contamination level must be Low, Medium, or High."
-      );
-      return false;
+      nextErrors.storageDurationDays = "Enter a valid storage duration of 0 days or more.";
     }
 
-    return true;
+    if (!dryingMethod) {
+      nextErrors.dryingMethod = "Select a drying method.";
+    }
+
+    if (!storageType) {
+      nextErrors.storageType = "Select a storage type.";
+    }
+
+    if (!contamination) {
+      nextErrors.contamination = "Select a contamination level.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const onCheck = async () => {
@@ -126,10 +104,10 @@ export default function ExportReadinessForm() {
       const payload = {
         Chip_Sample_Weight_g: Number(chipWeight),
         Drying_Time_Days: Number(dryingTime),
-        Drying_Method: dryingMethod.trim(),
-        Storage_Type: storageType.trim(),
-        Storage_Duration_Weeks: Number(storageDuration),
-        Contamination_Level: contamination.trim(),
+        Drying_Method: dryingMethod,
+        Storage_Type: storageType,
+        Storage_Duration_Days: Number(storageDurationDays),
+        Contamination_Level: contamination,
       };
 
       const result = await checkExportReadiness(payload);
@@ -167,40 +145,69 @@ export default function ExportReadinessForm() {
               label="Chip sample weight"
               value={chipWeight}
               suffix="g"
-              onChange={setChipWeight}
+              onChange={(value) => {
+                setChipWeight(value);
+                clearError("chipWeight");
+              }}
               keyboardType="numeric"
+              error={errors.chipWeight}
             />
 
-            <Row
+            <ChoiceRow
               label="Drying method"
               value={dryingMethod}
-              onChange={setDryingMethod}
+              options={DRYING_METHODS}
+              onChange={(value) => {
+                setDryingMethod(value);
+                clearError("dryingMethod");
+              }}
+              error={errors.dryingMethod}
             />
 
             <Row
-              label="Drying time (days)"
+              label="Drying time"
               value={dryingTime}
-              onChange={setDryingTime}
+              suffix="days"
+              onChange={(value) => {
+                setDryingTime(value);
+                clearError("dryingTime");
+              }}
               keyboardType="numeric"
+              error={errors.dryingTime}
             />
 
-            <Row
+            <ChoiceRow
               label="Storage type"
               value={storageType}
-              onChange={setStorageType}
+              options={STORAGE_TYPES}
+              onChange={(value) => {
+                setStorageType(value);
+                clearError("storageType");
+              }}
+              error={errors.storageType}
             />
 
             <Row
-              label="Storage duration (weeks)"
-              value={storageDuration}
-              onChange={setStorageDuration}
+              label="Storage duration"
+              value={storageDurationDays}
+              suffix="days"
+              onChange={(value) => {
+                setStorageDurationDays(value);
+                clearError("storageDurationDays");
+              }}
               keyboardType="numeric"
+              error={errors.storageDurationDays}
             />
 
-            <Row
+            <ChoiceRow
               label="Contamination level"
               value={contamination}
-              onChange={setContamination}
+              options={CONTAMINATION_LEVELS}
+              onChange={(value) => {
+                setContamination(value);
+                clearError("contamination");
+              }}
+              error={errors.contamination}
             />
           </View>
 
@@ -236,18 +243,24 @@ function Row({
   onChange,
   suffix,
   keyboardType = "default",
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   suffix?: string;
   keyboardType?: "default" | "numeric";
+  error?: string;
 }) {
   return (
     <View>
       <Text className="text-gray-800 mb-2 font-medium">{label}</Text>
 
-      <View className="w-full border border-gray-300 rounded-lg px-3 py-3 flex-row items-center">
+      <View
+        className={`w-full border rounded-lg px-3 py-3 flex-row items-center ${
+          error ? "border-red-400 bg-red-50" : "border-gray-300"
+        }`}
+      >
         <TextInput
           value={value}
           onChangeText={onChange}
@@ -258,6 +271,50 @@ function Row({
         />
         {!!suffix && <Text className="text-gray-600 ml-2">{suffix}</Text>}
       </View>
+      {error ? <Text className="text-red-600 text-xs mt-1">{error}</Text> : null}
+    </View>
+  );
+}
+
+function ChoiceRow({
+  label,
+  value,
+  options,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: string;
+  options: { label: string; value: string }[];
+  onChange: (v: string) => void;
+  error?: string;
+}) {
+  return (
+    <View>
+      <Text className="text-gray-800 mb-2 font-medium">{label}</Text>
+      <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+        {options.map((option) => {
+          const active = option.value === value;
+          return (
+            <TouchableOpacity
+              key={option.value}
+              onPress={() => onChange(option.value)}
+              className={`px-4 py-3 rounded-lg border ${
+                active
+                  ? "bg-primary border-primary"
+                  : error
+                    ? "bg-red-50 border-red-300"
+                    : "bg-white border-gray-300"
+              }`}
+            >
+              <Text className={active ? "text-white font-semibold" : "text-gray-800"}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+      {error ? <Text className="text-red-600 text-xs mt-1">{error}</Text> : null}
     </View>
   );
 }
