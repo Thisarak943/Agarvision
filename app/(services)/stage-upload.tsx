@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { predictStage } from "../../services/stageApi";
+import Toast from "react-native-toast-message";
 
 export default function StageUpload() {
   const router = useRouter();
@@ -142,7 +143,7 @@ export default function StageUpload() {
     return true;
   };
 
-  const validateMonthsFirst = (value: string, last = monthsLast, inoc = inoculations) => {
+  const validateMonthsFirst = (value: string, last = monthsLast, inoc = inoculations, ageValue = age) => {
     if (!value.trim()) {
       setMonthsFirstError("Months since first inoculation is required.");
       return false;
@@ -158,6 +159,17 @@ export default function StageUpload() {
     if (firstNum < 0) {
       setMonthsFirstError("Months since first inoculation cannot be negative.");
       return false;
+    }
+
+    if (ageValue.trim() !== "" && isNumeric(ageValue)) {
+      const maxMonths = Number(ageValue) * 12;
+
+      if (firstNum >= maxMonths) {
+        setMonthsFirstError(
+          "Months since first inoculation must be less than tree age in months."
+        );
+        return false;
+      }
     }
 
     if (last.trim() !== "" && isNumeric(last)) {
@@ -189,7 +201,7 @@ export default function StageUpload() {
     return true;
   };
 
-  const validateMonthsLast = (value: string, first = monthsFirst, inoc = inoculations) => {
+  const validateMonthsLast = (value: string, first = monthsFirst, inoc = inoculations, ageValue = age) => {
     if (!value.trim()) {
       setMonthsLastError("Months since last inoculation is required.");
       return false;
@@ -205,6 +217,17 @@ export default function StageUpload() {
     if (lastNum < 0) {
       setMonthsLastError("Months since last inoculation cannot be negative.");
       return false;
+    }
+
+    if (ageValue.trim() !== "" && isNumeric(ageValue)) {
+      const maxMonths = Number(ageValue) * 12;
+
+      if (lastNum >= maxMonths) {
+        setMonthsLastError(
+          "Months since last inoculation must be less than tree age in months."
+        );
+        return false;
+      }
     }
 
     if (first.trim() !== "" && isNumeric(first)) {
@@ -241,8 +264,8 @@ export default function StageUpload() {
     const ageValid = validateAge(age);
     const diameterValid = validateDiameter(diameter);
     const inoculationsValid = validateInoculations(inoculations, monthsFirst, monthsLast);
-    const monthsFirstValid = validateMonthsFirst(monthsFirst, monthsLast, inoculations);
-    const monthsLastValid = validateMonthsLast(monthsLast, monthsFirst, inoculations);
+    const monthsFirstValid = validateMonthsFirst(monthsFirst, monthsLast, inoculations, age);
+    const monthsLastValid = validateMonthsLast(monthsLast, monthsFirst, inoculations, age);
 
     return (
       imageValid &&
@@ -273,9 +296,15 @@ export default function StageUpload() {
       setLoading(false);
 
       if (result.error) {
-        alert(result.error);
+        Toast.show({
+          type: "error",
+          text1: "Invalid Image",
+          text2: result.error,
+          position: "top",
+          visibilityTime: 8000,
+        });
         return;
-      }
+   }
 
       router.push({
         pathname: "/(services)/stage-result",
@@ -286,32 +315,55 @@ export default function StageUpload() {
       });
     } catch (e: any) {
       setLoading(false);
-      alert(e?.message || "Prediction failed");
+      Toast.show({
+            type: "error",
+            text1: "Prediction Failed",
+            text2: e?.message || "Prediction failed",
+            position: "top",
+            visibilityTime: 8000,
+            });
     }
   };
 
   return (
-    <View className="flex-1 bg-[#E6F2ED] px-5 pt-4 justify-between">
-      <View className="mt-2 mb-3">
-        <Text className="text-center text-xl font-semibold">
+    <View className="flex-1 bg-[#E6F2ED]">
+      <View className="bg-white h-20 px-6 flex-row items-center justify-center border-b border-gray-200">
+        <TouchableOpacity onPress={() => router.back()} className="absolute left-6">
+          <Text className="text-3xl text-gray-800">‹</Text>
+        </TouchableOpacity>
+
+        <Text className="text-xl font-semibold text-black">
           Resin Induction Stage Classifier
         </Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="bg-white rounded-2xl p-6 mt-2 shadow-md">
-          <Text className="text-lg font-semibold mb-4">Upload Your Image</Text>
+      <ScrollView className="flex-1 px-5 pt-5" showsVerticalScrollIndicator={false}>
+        <View className="bg-white rounded-3xl p-6 mt-2 shadow-lg border border-green-200">
+          <Text className="text-lg font-semibold mb-4 text-gray-900">
+            Upload Your Image
+          </Text>
 
           <TouchableOpacity
             onPress={pickImage}
-            className={`border-2 border-dashed rounded-xl p-6 items-center mb-2 ${
-              imageError ? "border-red-500" : "border-gray-400"
+            className={`border-2 border-dashed rounded-2xl p-6 items-center mb-2 ${
+              imageError ? "border-red-500" : "border-green-300"
             }`}
           >
             {image ? (
-              <Image source={{ uri: image }} className="w-40 h-40 rounded-lg" />
+              <Image
+                source={{ uri: image }}
+                className="w-full h-52 rounded-xl"
+                resizeMode="cover"
+              />
             ) : (
-              <Text className="text-gray-500">Select Image (Bark)</Text>
+              <View className="items-center">
+                <Text className="text-gray-500 text-center">
+                  Select Image (Bark)
+                </Text>
+                <Text className="text-gray-400 text-center mt-2 text-sm">
+                  Use a clear agarwood bark image
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
 
@@ -321,16 +373,24 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
 
-          <Text className="mb-1">Tree Age</Text>
+          <View className="h-[2px] w-full bg-green-300 mb-6 rounded" />
+
+          <Text className="text-lg font-semibold mb-4 text-gray-900">
+            Tree & Inoculation Details
+          </Text>
+
+          <Text className="mb-1 text-gray-700">Tree Age</Text>
           <TextInput
             value={age}
             onChangeText={(text) => {
               setAge(text);
               validateAge(text);
+              validateMonthsFirst(monthsFirst, monthsLast, inoculations, text);
+              validateMonthsLast(monthsLast, monthsFirst, inoculations, text);
             }}
             placeholder="Enter age"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${
+            className={`border rounded-xl p-3 bg-white ${
               ageError ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -340,7 +400,7 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
 
-          <Text className="mb-1">Diameter (cm)</Text>
+          <Text className="mb-1 text-gray-700">Diameter (cm)</Text>
           <TextInput
             value={diameter}
             onChangeText={(text) => {
@@ -349,7 +409,7 @@ export default function StageUpload() {
             }}
             placeholder="Enter diameter"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${
+            className={`border rounded-xl p-3 bg-white ${
               diameterError ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -359,18 +419,18 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
 
-          <Text className="mb-1">Inoculations Count</Text>
+          <Text className="mb-1 text-gray-700">Inoculations Count</Text>
           <TextInput
             value={inoculations}
             onChangeText={(text) => {
               setInoculations(text);
               validateInoculations(text, monthsFirst, monthsLast);
-              validateMonthsFirst(monthsFirst, monthsLast, text);
-              validateMonthsLast(monthsLast, monthsFirst, text);
+              validateMonthsFirst(monthsFirst, monthsLast, text, age);
+              validateMonthsLast(monthsLast, monthsFirst, text, age);
             }}
             placeholder="Enter count"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${
+            className={`border rounded-xl p-3 bg-white ${
               inoculationsError ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -380,18 +440,20 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
 
-          <Text className="mb-1">Months Since First Inoculation</Text>
+          <Text className="mb-1 text-gray-700">
+            Months Since First Inoculation
+          </Text>
           <TextInput
             value={monthsFirst}
             onChangeText={(text) => {
               setMonthsFirst(text);
-              validateMonthsFirst(text, monthsLast, inoculations);
-              validateMonthsLast(monthsLast, text, inoculations);
+              validateMonthsFirst(text, monthsLast, inoculations, age);
+              validateMonthsLast(monthsLast, text, inoculations, age);
               validateInoculations(inoculations, text, monthsLast);
             }}
             placeholder="Enter months"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${
+            className={`border rounded-xl p-3 bg-white ${
               monthsFirstError ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -401,18 +463,20 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
 
-          <Text className="mb-1">Months Since Last Inoculation</Text>
+          <Text className="mb-1 text-gray-700">
+            Months Since Last Inoculation
+          </Text>
           <TextInput
             value={monthsLast}
             onChangeText={(text) => {
               setMonthsLast(text);
-              validateMonthsLast(text, monthsFirst, inoculations);
-              validateMonthsFirst(monthsFirst, text, inoculations);
+              validateMonthsLast(text, monthsFirst, inoculations, age);
+              validateMonthsFirst(monthsFirst, text, inoculations, age);
               validateInoculations(inoculations, monthsFirst, text);
             }}
             placeholder="Enter months"
             keyboardType="numeric"
-            className={`border rounded-lg p-3 bg-white ${
+            className={`border rounded-xl p-3 bg-white ${
               monthsLastError ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -422,17 +486,23 @@ export default function StageUpload() {
             <View className="mb-4" />
           )}
         </View>
+
+        <View className="h-24" />
       </ScrollView>
 
-      <TouchableOpacity
-        onPress={handlePredict}
-        disabled={loading}
-        className={`py-4 rounded-xl mb-6 mt-4 ${loading ? "bg-green-400" : "bg-green-600"}`}
-      >
-        <Text className="text-white text-center font-semibold text-lg">
-          {loading ? "Predicting..." : "Predict"}
-        </Text>
-      </TouchableOpacity>
+      <View className="px-5 pb-5 pt-3 bg-[#E6F2ED]">
+        <TouchableOpacity
+          onPress={handlePredict}
+          disabled={loading}
+          className={`py-4 rounded-xl shadow-md ${
+            loading ? "bg-green-400" : "bg-green-600"
+          }`}
+        >
+          <Text className="text-white text-center font-semibold text-lg">
+            {loading ? "Predicting..." : "Predict"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
