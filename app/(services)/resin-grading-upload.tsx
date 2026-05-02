@@ -11,6 +11,7 @@ export default function ResinGradingUpload() {
   const router = useRouter();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -23,19 +24,31 @@ export default function ResinGradingUpload() {
 
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
+      setMessage(null);
     }
   };
 
-  const clearImage = () => setImageUri(null);
+  const clearImage = () => {
+    setImageUri(null);
+    setMessage(null);
+  };
 
   const analyzeImage = async () => {
     if (!imageUri) return;
 
     try {
       setLoading(true);
+      setMessage(null);
 
       // call backend
       const result = await predictResinGrading(imageUri);
+
+      if (result?.status === "rejected") {
+        setMessage(
+          result?.message ?? "Please upload a clear agarwood resin chip image."
+        );
+        return;
+      }
 
       // go to result page with response + image
       router.push({
@@ -46,7 +59,9 @@ export default function ResinGradingUpload() {
         },
       });
     } catch (e: any) {
-      Alert.alert("Network error", e?.message ?? "Failed to analyze image");
+      const errorMessage = e?.message ?? "Failed to analyze image";
+      setMessage(errorMessage);
+      Alert.alert("Network error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -102,6 +117,14 @@ export default function ResinGradingUpload() {
             )}
           </View>
         </View>
+
+        {message ? (
+          <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mt-4">
+            <Text className="text-red-700 text-center font-semibold leading-5">
+              {message}
+            </Text>
+          </View>
+        ) : null}
 
         <TouchableOpacity
           onPress={analyzeImage}

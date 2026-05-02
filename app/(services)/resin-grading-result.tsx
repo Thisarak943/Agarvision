@@ -8,6 +8,8 @@ type BackendResult = {
   predicted_class?: string;
   confidence?: number;
   predicted_index?: number;
+  recommended_market?: string;
+  market_reason?: string;
   status?: string;
 };
 
@@ -31,28 +33,8 @@ export default function ResinGradingResult() {
     typeof result?.confidence === "number"
       ? `${Math.round(result.confidence * 100)}%`
       : "N/A";
-
-  // Market recommendation based on grade
-  const getRecommendedMarket = (gradeValue: string): string => {
-    const gradeUpper = gradeValue.toUpperCase();
-    
-    // Premium → Middle East Countries
-    if (gradeUpper === "PREMIUM") {
-      return "Middle East Countries";
-    } 
-    // Grade A → Europe
-    else if (gradeUpper.includes("GRADE A") || gradeUpper === "A") {
-      return "Europe";
-    } 
-    // Grade B → South Asia
-    else if (gradeUpper.includes("GRADE B") || gradeUpper === "B") {
-      return "South Asia";
-    }
-    
-    return "N/A";
-  };
-
-  const market = getRecommendedMarket(grade);
+  const market = result?.recommended_market ?? "N/A";
+  const marketReason = result?.market_reason ?? "";
 
   return (
     <SafeAreaView className="flex-1 bg-emerald-50">
@@ -64,7 +46,6 @@ export default function ResinGradingResult() {
             Analyzed Result
           </Text>
 
-          {/* Show uploaded image */}
           {imageUri ? (
             <View className="items-center mb-4">
               <Image
@@ -76,27 +57,23 @@ export default function ResinGradingResult() {
           ) : null}
 
           <View className="border-t border-gray-200 py-4">
-            <View className="flex-row justify-between">
-              <Text className="text-gray-700">Grading Quality :</Text>
-              <Text className="font-bold text-gray-900">{grade}</Text>
-            </View>
+            <ResultRow label="Grading Quality" value={grade} />
           </View>
 
           <View className="border-t border-gray-200 py-4">
-            <View className="flex-row justify-between">
-              <Text className="text-gray-700">Confidence level :</Text>
-              <Text className="font-bold text-gray-900">{confidence}</Text>
-            </View>
+            <ResultRow label="Confidence level" value={confidence} />
           </View>
 
           <View className="border-t border-gray-200 py-4">
-            <View className="flex-row justify-between">
-              <Text className="text-gray-700">Recommended market :</Text>
-              <Text className="font-bold text-gray-900">{market}</Text>
-            </View>
+            <ResultRow label="Recommended market" value={market} />
           </View>
 
-          {/* If something went wrong */}
+          {marketReason ? (
+            <Text className="text-gray-700 text-sm leading-5 mt-1">
+              {marketReason}
+            </Text>
+          ) : null}
+
           {!result ? (
             <Text className="text-red-600 text-center mt-4">
               Result not received. Please try again.
@@ -104,9 +81,9 @@ export default function ResinGradingResult() {
           ) : null}
 
           <View className="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-4 mt-6 mb-4">
-           <Text className="text-gray-900 font-semibold text-center text-lg leading-6">
-               Check whether the resin is Export Ready ?
-           </Text>
+            <Text className="text-gray-900 font-semibold text-center text-lg leading-6">
+              Check whether the resin is Export Ready?
+            </Text>
           </View>
 
           <TouchableOpacity
@@ -132,5 +109,16 @@ export default function ResinGradingResult() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+function ResultRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View className="flex-row items-start justify-between">
+      <Text className="text-gray-700 flex-shrink-0 mr-4">{label}</Text>
+      <Text className="font-bold text-gray-900 text-right flex-1">
+        {value}
+      </Text>
+    </View>
   );
 }
