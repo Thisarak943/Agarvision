@@ -8,7 +8,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import { PremiumServiceGuard } from "../../../components/PremiumServiceGuard";
+import { PremiumServiceGuard } from "../../../components/PremiumServiceGuard";
 
 const TopBar = ({ title }: { title: string }) => (
   <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
@@ -58,8 +58,8 @@ const FeatureRow = ({
 
 export default function MarketPriceLanding() {
   return (
-    // <PremiumServiceGuard serviceName="Market Intelligence">
-    <SafeAreaView className="flex-1 bg-emerald-50">
+    <PremiumServiceGuard serviceName="Market Intelligence">
+      <SafeAreaView className="flex-1 bg-emerald-50">
       <TopBar title="Market Intelligence.." />
 
       <View style={styles.responsiveContainer}>
@@ -127,8 +127,8 @@ export default function MarketPriceLanding() {
       </View>
 
       <FloatingChat />
-    </SafeAreaView>
-    // </PremiumServiceGuard>
+      </SafeAreaView>
+    </PremiumServiceGuard>
   );
 }
 

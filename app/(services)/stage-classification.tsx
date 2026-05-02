@@ -1,14 +1,14 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
-//import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
+import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 
 export default function StageClassification() {
   const router = useRouter();
 
   return (
-    //<PremiumServiceGuard serviceName="Stage Classification">
-    <View className="flex-1 bg-[#E6F2ED]">
+    <PremiumServiceGuard serviceName="Stage Classification">
+      <View className="flex-1 bg-[#E6F2ED]">
 
       {/* Header */}
       <View className="bg-white h-20 px-6 flex-row items-center justify-center border-b border-gray-200">
@@ -86,7 +86,7 @@ export default function StageClassification() {
         </View>
 
       </View>
-    </View>
-    //</PremiumServiceGuard>
+      </View>
+    </PremiumServiceGuard>
   );
 }
