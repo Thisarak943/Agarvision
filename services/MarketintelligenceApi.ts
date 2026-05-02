@@ -8,15 +8,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import axios from "axios";
+import { MARKET_BASE } from "./config";
 
 const marketChatbotApi = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: MARKET_BASE,
   timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });
 
 const marketDemandApi = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: MARKET_BASE,
   timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });

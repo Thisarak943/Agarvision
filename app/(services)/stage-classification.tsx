@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 //import { PremiumServiceGuard } from "../../components/PremiumServiceGuard";
 
@@ -16,7 +16,7 @@ export default function StageClassification() {
           onPress={() => router.back()}
           className="absolute left-6"
         >
-          <ArrowLeft size={26} color="#1f2937" />
+          <MaterialCommunityIcons name="arrow-left" size={26} color="#1f2937" />
         </TouchableOpacity>
 
         <Text className="text-xl font-semibold text-black">
